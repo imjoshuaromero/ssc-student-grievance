@@ -271,6 +271,46 @@
     <script>
         // API_BASE_URL is already defined in auth.js - don't redeclare it
         
+        // Check if this is a Google registration
+        const urlParams = new URLSearchParams(window.location.search);
+        const isGoogleRegistration = urlParams.get('google_login') === 'true';
+        const googleData = {
+            email: urlParams.get('email') || '',
+            firstName: urlParams.get('first_name') || '',
+            lastName: urlParams.get('last_name') || '',
+            googleId: urlParams.get('google_id') || ''
+        };
+        
+        // If Google registration, pre-fill and hide password fields
+        if (isGoogleRegistration && googleData.googleId) {
+            document.addEventListener('DOMContentLoaded', function() {
+                // Pre-fill form
+                document.getElementById('email').value = googleData.email;
+                document.getElementById('email').readOnly = true;
+                document.getElementById('firstName').value = googleData.firstName;
+                document.getElementById('lastName').value = googleData.lastName;
+                
+                // Hide password fields
+                const passwordFields = document.querySelectorAll('#password, #confirmPassword').forEach(field => {
+                    field.closest('.form-control').style.display = 'none';
+                });
+                
+                // Update form heading
+                const heading = document.querySelector('h2');
+                if (heading) {
+                    heading.textContent = 'Complete Your Registration';
+                }
+                
+                const subheading = heading ? heading.nextElementSibling : null;
+                if (subheading) {
+                    subheading.textContent = 'Just a few more details to get started';
+                }
+                
+                // Show alert
+                showAlert('Complete your registration with Google', 'info');
+            });
+        }
+        
         // Toggle password visibility for both fields
         document.getElementById('togglePassword').addEventListener('click', function() {
             const passwordInput = document.getElementById('password');
@@ -336,15 +376,17 @@
             const confirmPassword = document.getElementById('confirmPassword').value;
             const terms = document.getElementById('terms').checked;
             
-            // Validation
-            if (password !== confirmPassword) {
-                showAlert('Passwords do not match!', 'error');
-                return;
-            }
-            
-            if (password.length < 6) {
-                showAlert('Password must be at least 6 characters long!', 'error');
-                return;
+            // Validation for non-Google registration
+            if (!isGoogleRegistration) {
+                if (password !== confirmPassword) {
+                    showAlert('Passwords do not match!', 'error');
+                    return;
+                }
+                
+                if (password.length < 6) {
+                    showAlert('Password must be at least 6 characters long!', 'error');
+                    return;
+                }
             }
             
             if (!terms) {
@@ -357,73 +399,52 @@
             registerBtn.innerHTML = '<span class="loading loading-spinner"></span> Creating account...';
             
             try {
-                const response = await fetch(`${API_BASE_URL}/auth/register`, {
+                // Choose endpoint and payload based on registration type
+                const endpoint = isGoogleRegistration ? 
+                    `${API_BASE_URL}/auth/google/register` : 
+                    `${API_BASE_URL}/auth/register`;
+                
+                const payload = {
+                    first_name: firstName,
+                    last_name: lastName,
+                    sr_code: srCode,
+                    program: program,
+                    year_level: yearLevel,
+                    email: email,
+                    role: 'student'
+                };
+                
+                // Add password or Google ID based on registration type
+                if (isGoogleRegistration) {
+                    payload.google_id = googleData.googleId;
+                } else {
+                    payload.password = password;
+                }
+                
+                const response = await fetch(endpoint, {
                     method: 'POST',
                     headers: {
                         'Content-Type': 'application/json'
                     },
-                    body: JSON.stringify({
-                        first_name: firstName,
-                        last_name: lastName,
-                        sr_code: srCode,
-                        program: program,
-                        year_level: yearLevel,
-                        email: email,
-                        password: password,
-                        role: 'student'
-                    })
+                    body: JSON.stringify(payload)
                 });
                 
                 const data = await response.json();
                 
                 if (response.ok) {
-                    // Send verification code
-                    showAlert('Account created! Sending verification code...', 'success');
+                    // Save token and user data
+                    localStorage.setItem('token', data.token);
+                    localStorage.setItem('user', JSON.stringify(data.user));
                     
-                    try {
-                        const verifyResponse = await fetch(`${API_BASE_URL}/auth/send-verification-code`, {
-                            method: 'POST',
-                            headers: {
-                                'Content-Type': 'application/json'
-                            },
-                            body: JSON.stringify({ email: email })
-                        });
-                        
-                        if (verifyResponse.ok) {
-                            // Store email for verification page
-                            localStorage.setItem('verification_email', email);
-                            localStorage.setItem('temp_token', data.token);
-                            
-                            showAlert('Verification code sent! Please check your email.', 'success');
-                            
-                            setTimeout(() => {
-                                window.location.href = `/verify-email?email=${encodeURIComponent(email)}`;
-                            }, 1500);
+                    showAlert('Registration successful! Redirecting...', 'success');
+                    
+                    setTimeout(() => {
+                        if (data.user.role === 'admin') {
+                            window.location.href = '/admin-dashboard';
                         } else {
-                            // Registration successful but verification failed
-                            // Still allow login
-                            localStorage.setItem('token', data.token);
-                            localStorage.setItem('user', JSON.stringify(data.user));
-                            
-                            showAlert('Account created! Verification email failed to send.', 'warning');
-                            
-                            setTimeout(() => {
-                                window.location.href = '/student-dashboard';
-                            }, 1500);
-                        }
-                    } catch (verifyError) {
-                        console.error('Verification send error:', verifyError);
-                        
-                        // Still allow login
-                        localStorage.setItem('token', data.token);
-                        localStorage.setItem('user', JSON.stringify(data.user));
-                        
-                        showAlert('Account created! Redirecting...', 'success');
-                        
-                        setTimeout(() => {
                             window.location.href = '/student-dashboard';
-                        }, 1500);
-                    }
+                        }
+                    }, 1500);
                 } else {
                     showAlert(data.error || 'Registration failed. Please try again.', 'error');
                     registerBtn.disabled = false;
