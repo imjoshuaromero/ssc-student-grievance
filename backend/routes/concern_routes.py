@@ -52,18 +52,26 @@ def create_concern():
         # Handle file uploads
         attachment_paths = []
         if files:
-            upload_folder = current_app.config['UPLOAD_FOLDER']
-            os.makedirs(upload_folder, exist_ok=True)
-            for file in files:
-                if file and allowed_file(file.filename):
-                    filename = secure_filename(file.filename)
-                    # Add timestamp to avoid duplicates
-                    import time
-                    timestamp = str(int(time.time()))
-                    filename = f"{timestamp}_{filename}"
-                    filepath = os.path.join(upload_folder, filename)
-                    file.save(filepath)
-                    attachment_paths.append(filepath)
+            try:
+                upload_folder = current_app.config.get('UPLOAD_FOLDER', '/tmp/uploads')
+                print(f"Using upload folder: {upload_folder}")
+                os.makedirs(upload_folder, exist_ok=True)
+                for file in files:
+                    if file and allowed_file(file.filename):
+                        filename = secure_filename(file.filename)
+                        # Add timestamp to avoid duplicates
+                        import time
+                        timestamp = str(int(time.time()))
+                        filename = f"{timestamp}_{filename}"
+                        filepath = os.path.join(upload_folder, filename)
+                        file.save(filepath)
+                        attachment_paths.append(filepath)
+                        print(f"File saved: {filepath}")
+            except Exception as file_error:
+                print(f"File upload error: {file_error}")
+                import traceback
+                traceback.print_exc()
+                # Continue without attachments if upload fails
         
         # Convert is_anonymous to boolean
         is_anonymous = data.get('is_anonymous', 'false')
