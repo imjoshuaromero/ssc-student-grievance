@@ -6,8 +6,8 @@ services:
     plan: free
     region: singapore
     branch: for-deploy
-    buildCommand: pip install --upgrade pip setuptools wheel && pip install -r requirements.txt && mkdir -p uploads
-    startCommand: gunicorn backend.app:app --bind 0.0.0.0:$PORT
+    buildCommand: pip install --upgrade pip setuptools wheel && pip install -r requirements.txt
+    startCommand: mkdir -p /tmp/uploads && gunicorn backend.app:app --bind 0.0.0.0:$PORT
     envVars:
       - key: FLASK_ENV
         value: production

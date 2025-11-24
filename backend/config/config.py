@@ -50,6 +50,8 @@ class ProductionConfig(Config):
     """Production configuration"""
     DEBUG = False
     FLASK_ENV = 'production'
+    # Use /tmp for uploads in production (Render filesystem is read-only)
+    UPLOAD_FOLDER = '/tmp/uploads'
 
 config = {
     'development': DevelopmentConfig,
