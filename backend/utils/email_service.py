@@ -1,25 +1,43 @@
-from flask_mail import Mail, Message
+import smtplib
+from email.mime.text import MIMEText
+from email.mime.multipart import MIMEMultipart
 from flask import current_app
 import os
 import time
 
-mail = Mail()
-
 def init_mail(app):
-    """Initialize Flask-Mail with app"""
-    mail.init_app(app)
+    """Initialize email configuration with app (no-op for smtplib)"""
+    pass
 
 def send_email(to, subject, body_text, body_html=None, max_retries=3):
-    """Send email notification with retry logic"""
+    """Send email notification with retry logic using smtplib"""
     for attempt in range(max_retries):
         try:
-            msg = Message(
-                subject=subject,
-                recipients=[to] if isinstance(to, str) else to,
-                body=body_text,
-                html=body_html or body_text
-            )
-            mail.send(msg)
+            # Get email configuration from environment or app config
+            mail_server = os.getenv('MAIL_SERVER', 'smtp.gmail.com')
+            mail_port = int(os.getenv('MAIL_PORT', 587))
+            mail_username = os.getenv('MAIL_USERNAME', '')
+            mail_password = os.getenv('MAIL_PASSWORD', '')
+            mail_default_sender = os.getenv('MAIL_DEFAULT_SENDER', mail_username)
+            
+            # Create message
+            msg = MIMEMultipart('alternative')
+            msg['Subject'] = subject
+            msg['From'] = mail_default_sender
+            msg['To'] = to if isinstance(to, str) else ', '.join(to)
+            
+            # Attach text and HTML parts
+            part1 = MIMEText(body_text, 'plain')
+            part2 = MIMEText(body_html or body_text, 'html')
+            msg.attach(part1)
+            msg.attach(part2)
+            
+            # Send email
+            with smtplib.SMTP(mail_server, mail_port) as server:
+                server.starttls()
+                server.login(mail_username, mail_password)
+                server.send_message(msg)
+            
             print(f"✓ Email sent successfully to {to}")
             return True
         except Exception as e:

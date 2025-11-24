@@ -12,9 +12,8 @@ google-auth==2.25.2
 google-auth-oauthlib==1.2.0
 google-auth-httplib2==0.2.0
 
-# Email Support - Use blinker for Flask-Mail compatibility
-blinker==1.7.0
-Flask-Mail==0.9.1
+# Email Support - Use smtplib (built-in, no Flask-Mail)
+# Flask-Mail causes issues with Python 3.13
 
 # File Upload
 Pillow==10.1.0
