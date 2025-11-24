@@ -3,11 +3,12 @@ services:
   - type: web
     name: ssc-grievance-system
     runtime: python
-    buildCommand: pip install -r requirements.txt
-    startCommand: gunicorn backend.app:app
+    plan: free
+    region: singapore
+    branch: for-deploy
+    buildCommand: pip install --upgrade pip setuptools wheel && pip install -r requirements.txt && mkdir -p uploads
+    startCommand: gunicorn backend.app:app --bind 0.0.0.0:$PORT
     envVars:
-      - key: PYTHON_VERSION
-        value: 3.11.9
       - key: FLASK_ENV
         value: production
       - key: SECRET_KEY
