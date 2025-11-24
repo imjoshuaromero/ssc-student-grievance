@@ -12,8 +12,9 @@ google-auth==2.25.2
 google-auth-oauthlib==1.2.0
 google-auth-httplib2==0.2.0
 
-# Email Support
-Flask-Mail==0.10.0
+# Email Support - Use blinker for Flask-Mail compatibility
+blinker==1.7.0
+Flask-Mail==0.9.1
 
 # File Upload
 Pillow==10.1.0
