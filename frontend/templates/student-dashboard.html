@@ -925,9 +925,9 @@
                 if (response.ok) {
                     const data = await response.json();
                     const select = document.getElementById('concernOffice');
-                    if (select && data.offices) {
+                    if (select && data) {
                         select.innerHTML = '<option value="">Select an office</option>';
-                        data.offices.forEach(office => {
+                        data.forEach(office => {
                             select.innerHTML += `<option value="${office.office_id}">${office.office_name}</option>`;
                         });
                     }

@@ -185,7 +185,7 @@
                             <h2 class="text-white font-bold text-lg leading-tight">MAY CONCERN<br>KA BA?</h2>
                         </div>
                     </div>
-                    <p class="text-white/70 text-xs">Admin Dashboard</p>
+                    <p class="text-white/70 text-xl text-center">Admin Dashboard</p>
                 </div>
 
                 <!-- Admin Profile -->
@@ -262,7 +262,7 @@
                             <p class="text-white/80 text-sm lg:text-base">Manage and oversee all concerns</p>
                         </div>
                         <div class="flex gap-2">
-                            <button class="btn btn-outline btn-sm rounded-xl text-white border-white/30 hover:bg-white/10" aria-label="Export data">
+                            <button class="btn btn-outline btn-sm rounded-xl text-white border-white/30 hover:bg-white/10" onclick="exportDashboardData()" aria-label="Export data">
                                 <i class="fas fa-download"></i>
                                 <span class="hidden sm:inline">Export</span>
                             </button>
@@ -340,117 +340,18 @@
                 <!-- Recent Concerns -->
                 <section class="mb-8">
                     <div class="flex items-center justify-between mb-6">
-                        <h2 class="text-xl lg:text-2xl font-bold text-white">Recent Concerns</h2>
+                        <div>
+                            <h2 class="text-xl lg:text-2xl font-bold text-white">Recent Concerns</h2>
+                            <p id="lastUpdated" class="text-xs text-white/60 mt-1">Loading...</p>
+                        </div>
                         <a href="#" data-section="all-concerns" class="text-white/80 hover:text-white text-sm transition-colors view-all-link">View All →</a>
                     </div>
 
-                    <div class="space-y-4">
-                        <!-- Concern Card 1 -->
-                        <div class="concern-card rounded-2xl p-5 lg:p-6 shadow-lg">
-                            <div class="flex flex-wrap items-start justify-between gap-4 mb-4">
-                                <div class="flex-1 min-w-0">
-                                    <div class="flex items-center gap-2 mb-2">
-                                        <span class="status-badge badge badge-warning badge-sm">Pending</span>
-                                        <span class="text-xs text-gray-500">Submitted by Juan Dela Cruz</span>
-                                        <span class="text-xs text-gray-400">• 2 hours ago</span>
-                                    </div>
-                                    <h3 class="text-base lg:text-lg font-bold text-gray-800 mb-2">Broken Air Conditioning in Room 301</h3>
-                                    <p class="text-sm text-gray-600 line-clamp-2">The air conditioning unit has not been working for the past week, making it difficult to concentrate during classes...</p>
-                                </div>
-                                <div class="flex gap-2">
-                                    <button class="btn btn-primary btn-sm rounded-xl">
-                                        <i class="fas fa-check"></i>
-                                        Assign
-                                    </button>
-                                    <button class="btn btn-ghost btn-sm rounded-xl" aria-label="View concern details">
-                                        <i class="fas fa-eye"></i>
-                                    </button>
-                                </div>
-                            </div>
-                            <div class="flex flex-wrap items-center gap-3 text-xs text-gray-500">
-                                <span class="flex items-center gap-1">
-                                    <i class="fas fa-tag"></i>
-                                    Facilities
-                                </span>
-                                <span class="flex items-center gap-1">
-                                    <i class="fas fa-building"></i>
-                                    Operations Office
-                                </span>
-                                <span class="flex items-center gap-1">
-                                    <i class="fas fa-exclamation-circle text-orange-500"></i>
-                                    High Priority
-                                </span>
-                            </div>
-                        </div>
-
-                        <!-- Concern Card 2 -->
-                        <div class="concern-card rounded-2xl p-5 lg:p-6 shadow-lg">
-                            <div class="flex flex-wrap items-start justify-between gap-4 mb-4">
-                                <div class="flex-1 min-w-0">
-                                    <div class="flex items-center gap-2 mb-2">
-                                        <span class="status-badge badge badge-info badge-sm">In Progress</span>
-                                        <span class="text-xs text-gray-500">Submitted by Maria Santos</span>
-                                        <span class="text-xs text-gray-400">• 5 hours ago</span>
-                                    </div>
-                                    <h3 class="text-base lg:text-lg font-bold text-gray-800 mb-2">Library Book Shortage</h3>
-                                    <p class="text-sm text-gray-600 line-clamp-2">There are insufficient copies of required textbooks in the library for students to borrow...</p>
-                                </div>
-                                <div class="flex gap-2">
-                                    <button class="btn btn-success btn-sm rounded-xl">
-                                        <i class="fas fa-check-circle"></i>
-                                        Resolve
-                                    </button>
-                                    <button class="btn btn-ghost btn-sm rounded-xl" aria-label="View concern details">
-                                        <i class="fas fa-eye"></i>
-                                    </button>
-                                </div>
-                            </div>
-                            <div class="flex flex-wrap items-center gap-3 text-xs text-gray-500">
-                                <span class="flex items-center gap-1">
-                                    <i class="fas fa-tag"></i>
-                                    Academic
-                                </span>
-                                <span class="flex items-center gap-1">
-                                    <i class="fas fa-building"></i>
-                                    Library
-                                </span>
-                                <span class="flex items-center gap-1">
-                                    <i class="fas fa-user"></i>
-                                    Assigned to Admin 1
-                                </span>
-                            </div>
-                        </div>
-
-                        <!-- Concern Card 3 -->
-                        <div class="concern-card rounded-2xl p-5 lg:p-6 shadow-lg">
-                            <div class="flex flex-wrap items-start justify-between gap-4 mb-4">
-                                <div class="flex-1 min-w-0">
-                                    <div class="flex items-center gap-2 mb-2">
-                                        <span class="status-badge badge badge-success badge-sm">Resolved</span>
-                                        <span class="text-xs text-gray-500">Submitted by Pedro Cruz</span>
-                                        <span class="text-xs text-gray-400">• 1 day ago</span>
-                                    </div>
-                                    <h3 class="text-base lg:text-lg font-bold text-gray-800 mb-2">Wifi Connection Issues</h3>
-                                    <p class="text-sm text-gray-600 line-clamp-2">Internet connectivity in the student lounge has been very unstable...</p>
-                                </div>
-                                <button class="btn btn-ghost btn-sm rounded-xl" aria-label="View concern details">
-                                    <i class="fas fa-eye"></i>
-                                </button>
-                            </div>
-                            <div class="flex flex-wrap items-center gap-3 text-xs text-gray-500">
-                                <span class="flex items-center gap-1">
-                                    <i class="fas fa-tag"></i>
-                                    Technology
-                                </span>
-                                <span class="flex items-center gap-1">
-                                    <i class="fas fa-building"></i>
-                                    IT Office
-                                </span>
-                                <span class="flex items-center gap-1">
-                                    <i class="fas fa-check-circle text-green-500"></i>
-                                    Completed
-                                </span>
-                            </div>
+                    <div id="recentConcernsList" class="space-y-4">
+                        <!-- Loading State -->
+                        <div class="concern-card rounded-2xl p-12 shadow-lg text-center">
+                            <div class="loading loading-spinner loading-lg text-primary"></div>
+                            <p class="mt-4 text-gray-600">Loading recent concerns...</p>
                         </div>
                     </div>
                 </section>
@@ -522,7 +423,7 @@
                             <h1 class="text-3xl lg:text-4xl font-bold text-white mb-2">All Concerns</h1>
                             <p class="text-white/80 text-sm lg:text-base">Manage all submitted concerns</p>
                         </div>
-                        <button class="btn btn-primary rounded-2xl gap-2">
+                        <button class="btn btn-primary rounded-2xl gap-2" onclick="exportAllConcerns()">
                             <i class="fas fa-download"></i>
                             Export Data
                         </button>
@@ -1154,6 +1055,75 @@
             }
         });
 
+        // Auto-refresh dashboard and pending concerns
+        let dashboardRefreshInterval = null;
+        let pendingRefreshInterval = null;
+        
+        function startDashboardAutoRefresh() {
+            // Clear any existing interval
+            if (dashboardRefreshInterval) {
+                clearInterval(dashboardRefreshInterval);
+            }
+            
+            console.log('Starting dashboard auto-refresh...');
+            
+            // Set up new interval to refresh every 10 seconds for testing
+            dashboardRefreshInterval = setInterval(async () => {
+                // Only refresh if we're on the dashboard section
+                const dashboardSection = document.getElementById('dashboard-section');
+                if (dashboardSection && !dashboardSection.classList.contains('hidden')) {
+                    console.log('🔄 Auto-refreshing dashboard data...', new Date().toLocaleTimeString());
+                    try {
+                        await loadDashboardData();
+                        console.log('✅ Dashboard refreshed successfully');
+                    } catch (error) {
+                        console.error('❌ Dashboard refresh failed:', error);
+                    }
+                }
+            }, 10000); // 10 seconds for immediate testing
+        }
+        
+        function startPendingAutoRefresh() {
+            // Clear any existing interval
+            if (pendingRefreshInterval) {
+                clearInterval(pendingRefreshInterval);
+            }
+            
+            console.log('Starting pending concerns auto-refresh...');
+            
+            // Set up new interval to refresh every 10 seconds for testing
+            pendingRefreshInterval = setInterval(async () => {
+                // Only refresh if we're on the pending section
+                const pendingSection = document.getElementById('pending-section');
+                if (pendingSection && !pendingSection.classList.contains('hidden')) {
+                    console.log('🔄 Auto-refreshing pending concerns...', new Date().toLocaleTimeString());
+                    try {
+                        await loadPendingConcerns();
+                        console.log('✅ Pending concerns refreshed successfully');
+                    } catch (error) {
+                        console.error('❌ Pending refresh failed:', error);
+                    }
+                }
+            }, 10000); // 10 seconds for immediate testing
+        }
+        
+        // Stop auto-refresh when leaving the page
+        window.addEventListener('beforeunload', () => {
+            if (dashboardRefreshInterval) {
+                clearInterval(dashboardRefreshInterval);
+            }
+            if (pendingRefreshInterval) {
+                clearInterval(pendingRefreshInterval);
+            }
+        });
+        
+        // Start auto-refresh after initial load
+        setTimeout(() => {
+            console.log('Initializing auto-refresh timers...');
+            startDashboardAutoRefresh();
+            startPendingAutoRefresh();
+        }, 2000); // Wait 2 seconds after page load
+
         // Load dashboard data
         async function loadDashboardData() {
             const token = localStorage.getItem('token');
@@ -1228,6 +1198,9 @@
                     // Update navigation badges
                     updateNavigationBadges(concerns);
 
+                    // Load recent concerns for dashboard
+                    loadRecentConcerns(concerns);
+
                     console.log('Dashboard stats updated successfully!');
                 } else {
                     console.error('Failed to load concerns - Status:', concernsResponse.status);
@@ -1235,6 +1208,144 @@
             } catch (error) {
                 console.error('Error loading concerns:', error);
             }
+        }
+
+        // Load and render recent concerns
+        function loadRecentConcerns(allConcerns) {
+            console.log('📋 loadRecentConcerns called with', allConcerns?.length, 'concerns');
+            const container = document.getElementById('recentConcernsList');
+            if (!container) {
+                console.error('❌ recentConcernsList container not found!');
+                return;
+            }
+
+            // Sort by created_at and get the 3 most recent
+            const recentConcerns = allConcerns
+                .sort((a, b) => new Date(b.created_at) - new Date(a.created_at))
+                .slice(0, 3);
+
+            console.log('📌 Recent concerns to display:', recentConcerns.length);
+
+            if (recentConcerns.length === 0) {
+                container.innerHTML = `
+                    <div class="concern-card rounded-2xl p-12 shadow-lg text-center">
+                        <i class="fas fa-inbox text-6xl text-gray-300 mb-4"></i>
+                        <h3 class="text-xl font-bold text-gray-800 mb-2">No Concerns Yet</h3>
+                        <p class="text-gray-600">New concerns will appear here</p>
+                    </div>
+                `;
+                return;
+            }
+
+            const statusBadgeClass = {
+                'pending': 'badge-warning',
+                'in-review': 'badge-info',
+                'in-progress': 'badge-info',
+                'resolved': 'badge-success',
+                'closed': 'badge-neutral'
+            };
+
+            const priorityIcons = {
+                'urgent': '<i class="fas fa-exclamation-circle text-red-500"></i> Urgent',
+                'high': '<i class="fas fa-exclamation-circle text-orange-500"></i> High Priority',
+                'normal': '<i class="fas fa-circle text-blue-500"></i> Normal',
+                'low': '<i class="fas fa-circle text-green-500"></i> Low'
+            };
+
+            // Helper function to format relative time
+            const getRelativeTime = (dateString) => {
+                const date = new Date(dateString);
+                const now = new Date();
+                const diffMs = now - date;
+                const diffMins = Math.floor(diffMs / 60000);
+                const diffHours = Math.floor(diffMs / 3600000);
+                const diffDays = Math.floor(diffMs / 86400000);
+
+                if (diffMins < 1) return 'Just now';
+                if (diffMins < 60) return `${diffMins} minute${diffMins > 1 ? 's' : ''} ago`;
+                if (diffHours < 24) return `${diffHours} hour${diffHours > 1 ? 's' : ''} ago`;
+                if (diffDays < 7) return `${diffDays} day${diffDays > 1 ? 's' : ''} ago`;
+                return date.toLocaleDateString();
+            };
+
+            container.innerHTML = recentConcerns.map(concern => {
+                const statusClass = statusBadgeClass[concern.status] || 'badge-neutral';
+                const statusText = concern.status.replace('-', ' ').toUpperCase();
+                const priorityText = priorityIcons[concern.priority] || priorityIcons['normal'];
+                const relativeTime = getRelativeTime(concern.created_at);
+                const studentName = concern.student_name || 'Anonymous';
+                const assignedText = concern.assigned_to ? `Assigned to ${concern.assigned_to}` : '';
+
+                // Determine button based on status
+                let actionButton = '';
+                if (concern.status === 'pending') {
+                    actionButton = `
+                        <button class="btn btn-primary btn-sm rounded-xl" onclick="openConcernModal(${concern.concern_id})">
+                            <i class="fas fa-check"></i>
+                            Assign
+                        </button>
+                    `;
+                } else if (concern.status === 'in-review' || concern.status === 'in-progress') {
+                    actionButton = `
+                        <button class="btn btn-success btn-sm rounded-xl" onclick="openConcernModal(${concern.concern_id})">
+                            <i class="fas fa-check-circle"></i>
+                            Resolve
+                        </button>
+                    `;
+                }
+
+                return `
+                    <div class="concern-card rounded-2xl p-5 lg:p-6 shadow-lg">
+                        <div class="flex flex-wrap items-start justify-between gap-4 mb-4">
+                            <div class="flex-1 min-w-0">
+                                <div class="flex items-center gap-2 mb-2">
+                                    <span class="status-badge badge ${statusClass} badge-sm">${statusText}</span>
+                                    <span class="text-xs text-gray-500">Submitted by ${studentName}</span>
+                                    <span class="text-xs text-gray-400">• ${relativeTime}</span>
+                                </div>
+                                <h3 class="text-base lg:text-lg font-bold text-gray-800 mb-2">${concern.title}</h3>
+                                <p class="text-sm text-gray-600 line-clamp-2">${concern.description || 'No description provided'}</p>
+                            </div>
+                            <div class="flex gap-2">
+                                ${actionButton}
+                                <button class="btn btn-ghost btn-sm rounded-xl" onclick="openConcernModal(${concern.concern_id})" aria-label="View concern details">
+                                    <i class="fas fa-eye"></i>
+                                </button>
+                            </div>
+                        </div>
+                        <div class="flex flex-wrap items-center gap-3 text-xs text-gray-500">
+                            <span class="flex items-center gap-1">
+                                <i class="fas fa-tag"></i>
+                                ${concern.category_name || 'Uncategorized'}
+                            </span>
+                            ${concern.office_name ? `
+                                <span class="flex items-center gap-1">
+                                    <i class="fas fa-building"></i>
+                                    ${concern.office_name}
+                                </span>
+                            ` : ''}
+                            <span class="flex items-center gap-1">
+                                ${priorityText}
+                            </span>
+                            ${assignedText ? `
+                                <span class="flex items-center gap-1">
+                                    <i class="fas fa-user"></i>
+                                    ${assignedText}
+                                </span>
+                            ` : ''}
+                        </div>
+                    </div>
+                `;
+            }).join('');
+            
+            // Update last updated timestamp
+            const lastUpdatedEl = document.getElementById('lastUpdated');
+            if (lastUpdatedEl) {
+                const now = new Date();
+                lastUpdatedEl.textContent = `Last updated: ${now.toLocaleTimeString()}`;
+            }
+            
+            console.log('✅ Recent concerns rendered successfully');
         }
 
         // Update navigation badges
@@ -1278,6 +1389,11 @@
                     loadAllAdminConcerns();
                 } else if (sectionName === 'pending') {
                     loadPendingConcerns();
+                    // Restart auto-refresh for pending section
+                    startPendingAutoRefresh();
+                } else if (sectionName === 'dashboard') {
+                    // Restart auto-refresh for dashboard
+                    startDashboardAutoRefresh();
                 } else if (sectionName === 'users') {
                     loadUsers();
                 } else if (sectionName === 'categories') {
@@ -1460,19 +1576,48 @@
         // Render pending concerns
         function renderPendingConcerns(concerns) {
             const container = document.getElementById('pendingConcernsList');
-            container.innerHTML = concerns.map(concern => `
+            
+            // Helper function to format relative time
+            const getRelativeTime = (dateString) => {
+                const date = new Date(dateString);
+                const now = new Date();
+                const diffMs = now - date;
+                const diffMins = Math.floor(diffMs / 60000);
+                const diffHours = Math.floor(diffMs / 3600000);
+                const diffDays = Math.floor(diffMs / 86400000);
+
+                if (diffMins < 1) return 'Just now';
+                if (diffMins < 60) return `${diffMins} minute${diffMins > 1 ? 's' : ''} ago`;
+                if (diffHours < 24) return `${diffHours} hour${diffHours > 1 ? 's' : ''} ago`;
+                if (diffDays < 7) return `${diffDays} day${diffDays > 1 ? 's' : ''} ago`;
+                return date.toLocaleDateString();
+            };
+            
+            const priorityIcons = {
+                'urgent': '<span class="text-red-500"><i class="fas fa-exclamation-circle"></i> Urgent</span>',
+                'high': '<span class="text-orange-500"><i class="fas fa-exclamation-triangle"></i> High</span>',
+                'normal': '<span class="text-blue-500"><i class="fas fa-circle"></i> Normal</span>',
+                'low': '<span class="text-green-500"><i class="fas fa-circle"></i> Low</span>'
+            };
+            
+            container.innerHTML = concerns.map(concern => {
+                const relativeTime = getRelativeTime(concern.created_at);
+                const priorityDisplay = priorityIcons[concern.priority] || priorityIcons['normal'];
+                
+                return `
                 <div class="concern-card rounded-2xl p-6 shadow-lg">
                     <div class="flex items-start justify-between gap-4 mb-4">
                         <div class="flex-1">
                             <div class="flex items-center gap-2 mb-2">
                                 <span class="badge badge-warning badge-sm">Pending</span>
-                                <span class="text-xs text-gray-500">${new Date(concern.created_at).toLocaleDateString()}</span>
+                                <span class="text-xs text-gray-500">${relativeTime}</span>
                             </div>
                             <h3 class="text-lg font-bold text-gray-800 mb-2">${concern.title}</h3>
-                            <p class="text-sm text-gray-600 mb-3">${concern.description}</p>
-                            <div class="flex flex-wrap gap-2 text-xs text-gray-500">
-                                <span><i class="fas fa-tag mr-1"></i>${concern.category_name}</span>
+                            <p class="text-sm text-gray-600 mb-3">${concern.description || 'No description provided'}</p>
+                            <div class="flex flex-wrap gap-3 text-xs text-gray-500">
+                                <span><i class="fas fa-tag mr-1"></i>${concern.category_name || 'Uncategorized'}</span>
                                 <span><i class="fas fa-user mr-1"></i>${concern.student_name || 'Anonymous'}</span>
+                                <span class="text-xs">${priorityDisplay}</span>
                             </div>
                         </div>
                     </div>
@@ -1488,7 +1633,8 @@
                         </button>
                     </div>
                 </div>
-            `).join('');
+            `;
+            }).join('');
         }
 
         // Load users
@@ -1862,7 +2008,13 @@
                 if (response.ok) {
                     alert('Status updated successfully!');
                     loadConcernDetails(currentConcernId);
-                    loadDashboardData(); // Refresh dashboard
+                    loadDashboardData(); // Refresh dashboard including recent concerns
+                    
+                    // Also refresh pending concerns if that section is visible
+                    const pendingSection = document.getElementById('pending-section');
+                    if (pendingSection && !pendingSection.classList.contains('hidden')) {
+                        await loadPendingConcerns();
+                    }
                 } else {
                     alert('Failed to update status: ' + (responseData.error || 'Unknown error'));
                 }
@@ -1889,6 +2041,12 @@
                     alert('Priority updated successfully!');
                     loadConcernDetails(currentConcernId);
                     loadDashboardData(); // Refresh dashboard
+                    
+                    // Also refresh pending concerns if that section is visible
+                    const pendingSection = document.getElementById('pending-section');
+                    if (pendingSection && !pendingSection.classList.contains('hidden')) {
+                        await loadPendingConcerns();
+                    }
                 } else {
                     alert('Failed to update priority');
                 }
@@ -1920,6 +2078,12 @@
                     alert('Concern assigned successfully!');
                     loadConcernDetails(currentConcernId);
                     loadDashboardData(); // Refresh dashboard
+                    
+                    // Also refresh pending concerns if that section is visible
+                    const pendingSection = document.getElementById('pending-section');
+                    if (pendingSection && !pendingSection.classList.contains('hidden')) {
+                        await loadPendingConcerns();
+                    }
                 } else {
                     alert('Failed to assign concern');
                 }
@@ -2491,16 +2655,268 @@
             document.getElementById('monthlyChart').innerHTML = chartHtml || '<p class="text-gray-500 text-center">No data available</p>';
         }
 
-        function exportReportCSV() {
-            alert('CSV export functionality - Generates a downloadable CSV file with report data');
+        async function exportReportCSV() {
+            try {
+                const token = localStorage.getItem('token');
+                const response = await fetch(`${API_BASE_URL}/concerns/`, {
+                    headers: {
+                        'Authorization': `Bearer ${token}`
+                    }
+                });
+
+                if (response.ok) {
+                    const concerns = await response.json();
+                    
+                    // CSV Headers
+                    const headers = ['ID', 'Title', 'Student', 'Category', 'Office', 'Status', 'Priority', 'Created Date', 'Description'];
+                    
+                    // CSV Rows
+                    const rows = concerns.map(concern => [
+                        concern.concern_id,
+                        `"${(concern.title || '').replace(/"/g, '""')}"`,
+                        `"${(concern.student_name || 'Anonymous').replace(/"/g, '""')}"`,
+                        `"${(concern.category_name || 'N/A').replace(/"/g, '""')}"`,
+                        `"${(concern.office_name || 'N/A').replace(/"/g, '""')}"`,
+                        concern.status,
+                        concern.priority,
+                        new Date(concern.created_at).toLocaleString(),
+                        `"${(concern.description || '').replace(/"/g, '""').replace(/\n/g, ' ')}"`
+                    ]);
+
+                    // Combine headers and rows
+                    const csvContent = [headers.join(','), ...rows.map(row => row.join(','))].join('\n');
+
+                    // Create download
+                    const blob = new Blob([csvContent], { type: 'text/csv;charset=utf-8;' });
+                    const link = document.createElement('a');
+                    const url = URL.createObjectURL(blob);
+                    link.setAttribute('href', url);
+                    link.setAttribute('download', `concerns_report_${new Date().toISOString().split('T')[0]}.csv`);
+                    link.style.visibility = 'hidden';
+                    document.body.appendChild(link);
+                    link.click();
+                    document.body.removeChild(link);
+
+                    showToast('CSV exported successfully!', 'success');
+                } else {
+                    showToast('Failed to fetch data for export', 'error');
+                }
+            } catch (error) {
+                console.error('CSV export error:', error);
+                showToast('Error exporting CSV', 'error');
+            }
         }
 
-        function exportReportPDF() {
-            alert('PDF export functionality - Generates a formatted PDF report');
+        async function exportReportPDF() {
+            try {
+                const token = localStorage.getItem('token');
+                const response = await fetch(`${API_BASE_URL}/concerns/`, {
+                    headers: {
+                        'Authorization': `Bearer ${token}`
+                    }
+                });
+
+                if (response.ok) {
+                    const concerns = await response.json();
+                    
+                    // Create printable HTML
+                    const printWindow = window.open('', '_blank');
+                    const html = `
+                        <!DOCTYPE html>
+                        <html>
+                        <head>
+                            <title>Concerns Report</title>
+                            <style>
+                                body { font-family: Arial, sans-serif; margin: 20px; }
+                                h1 { color: #1e3a8a; text-align: center; }
+                                .report-info { text-align: center; margin-bottom: 30px; color: #666; }
+                                table { width: 100%; border-collapse: collapse; margin-top: 20px; }
+                                th, td { border: 1px solid #ddd; padding: 8px; text-align: left; font-size: 12px; }
+                                th { background-color: #1e3a8a; color: white; }
+                                tr:nth-child(even) { background-color: #f9f9f9; }
+                                .status { padding: 3px 8px; border-radius: 3px; font-size: 11px; font-weight: bold; }
+                                .status-pending { background-color: #fef3c7; color: #92400e; }
+                                .status-in_progress { background-color: #dbeafe; color: #1e40af; }
+                                .status-resolved { background-color: #d1fae5; color: #065f46; }
+                                .status-closed { background-color: #e5e7eb; color: #374151; }
+                                .priority { padding: 3px 8px; border-radius: 3px; font-size: 11px; font-weight: bold; }
+                                .priority-low { background-color: #e5e7eb; color: #374151; }
+                                .priority-normal { background-color: #dbeafe; color: #1e40af; }
+                                .priority-high { background-color: #fef3c7; color: #92400e; }
+                                .priority-urgent { background-color: #fee2e2; color: #991b1b; }
+                                @media print {
+                                    body { margin: 10px; }
+                                    h1 { font-size: 18px; }
+                                    table { font-size: 10px; }
+                                }
+                            </style>
+                        </head>
+                        <body>
+                            <h1>Student Grievance System - Concerns Report</h1>
+                            <div class="report-info">
+                                <p>Generated on: ${new Date().toLocaleString()}</p>
+                                <p>Total Concerns: ${concerns.length}</p>
+                            </div>
+                            <table>
+                                <thead>
+                                    <tr>
+                                        <th>ID</th>
+                                        <th>Title</th>
+                                        <th>Student</th>
+                                        <th>Category</th>
+                                        <th>Office</th>
+                                        <th>Status</th>
+                                        <th>Priority</th>
+                                        <th>Created</th>
+                                    </tr>
+                                </thead>
+                                <tbody>
+                                    ${concerns.map(concern => `
+                                        <tr>
+                                            <td>${concern.concern_id}</td>
+                                            <td>${concern.title || 'N/A'}</td>
+                                            <td>${concern.student_name || 'Anonymous'}</td>
+                                            <td>${concern.category_name || 'N/A'}</td>
+                                            <td>${concern.office_name || 'N/A'}</td>
+                                            <td><span class="status status-${concern.status}">${concern.status}</span></td>
+                                            <td><span class="priority priority-${concern.priority}">${concern.priority}</span></td>
+                                            <td>${new Date(concern.created_at).toLocaleDateString()}</td>
+                                        </tr>
+                                    `).join('')}
+                                </tbody>
+                            </table>
+                        </body>
+                        </html>
+                    `;
+                    
+                    printWindow.document.write(html);
+                    printWindow.document.close();
+                    
+                    // Wait for content to load, then trigger print
+                    printWindow.onload = function() {
+                        printWindow.print();
+                    };
+
+                    showToast('Opening PDF print dialog...', 'success');
+                } else {
+                    showToast('Failed to fetch data for export', 'error');
+                }
+            } catch (error) {
+                console.error('PDF export error:', error);
+                showToast('Error exporting PDF', 'error');
+            }
         }
 
         function printReport() {
             window.print();
+        }
+
+        // Export dashboard data as CSV
+        async function exportDashboardData() {
+            try {
+                const token = localStorage.getItem('token');
+                const response = await fetch(`${API_BASE_URL}/concerns/`, {
+                    headers: {
+                        'Authorization': `Bearer ${token}`
+                    }
+                });
+
+                if (response.ok) {
+                    const concerns = await response.json();
+                    
+                    // CSV Headers
+                    const headers = ['ID', 'Ticket', 'Title', 'Student', 'Category', 'Office', 'Status', 'Priority', 'Created Date'];
+                    
+                    // CSV Rows
+                    const rows = concerns.map(concern => [
+                        concern.concern_id,
+                        `"${(concern.ticket_number || '').replace(/"/g, '""')}"`,
+                        `"${(concern.title || '').replace(/"/g, '""')}"`,
+                        `"${(concern.student_name || 'Anonymous').replace(/"/g, '""')}"`,
+                        `"${(concern.category_name || 'N/A').replace(/"/g, '""')}"`,
+                        `"${(concern.office_name || 'N/A').replace(/"/g, '""')}"`,
+                        concern.status,
+                        concern.priority,
+                        new Date(concern.created_at).toLocaleString()
+                    ]);
+
+                    // Combine headers and rows
+                    const csvContent = [headers.join(','), ...rows.map(row => row.join(','))].join('\n');
+
+                    // Create download
+                    const blob = new Blob([csvContent], { type: 'text/csv;charset=utf-8;' });
+                    const link = document.createElement('a');
+                    const url = URL.createObjectURL(blob);
+                    link.setAttribute('href', url);
+                    link.setAttribute('download', `dashboard_concerns_${new Date().toISOString().split('T')[0]}.csv`);
+                    link.style.visibility = 'hidden';
+                    document.body.appendChild(link);
+                    link.click();
+                    document.body.removeChild(link);
+
+                    showToast('Dashboard data exported successfully!', 'success');
+                } else {
+                    showToast('Failed to fetch data for export', 'error');
+                }
+            } catch (error) {
+                console.error('Export error:', error);
+                showToast('Error exporting data', 'error');
+            }
+        }
+
+        // Export all concerns as CSV
+        async function exportAllConcerns() {
+            try {
+                const token = localStorage.getItem('token');
+                const response = await fetch(`${API_BASE_URL}/concerns/`, {
+                    headers: {
+                        'Authorization': `Bearer ${token}`
+                    }
+                });
+
+                if (response.ok) {
+                    const concerns = await response.json();
+                    
+                    // CSV Headers
+                    const headers = ['ID', 'Ticket Number', 'Title', 'Description', 'Student', 'Category', 'Office', 'Status', 'Priority', 'Created Date', 'Updated Date'];
+                    
+                    // CSV Rows
+                    const rows = concerns.map(concern => [
+                        concern.concern_id,
+                        `"${(concern.ticket_number || '').replace(/"/g, '""')}"`,
+                        `"${(concern.title || '').replace(/"/g, '""')}"`,
+                        `"${(concern.description || '').replace(/"/g, '""').replace(/\n/g, ' ')}"`,
+                        `"${(concern.student_name || 'Anonymous').replace(/"/g, '""')}"`,
+                        `"${(concern.category_name || 'N/A').replace(/"/g, '""')}"`,
+                        `"${(concern.office_name || 'N/A').replace(/"/g, '""')}"`,
+                        concern.status,
+                        concern.priority,
+                        new Date(concern.created_at).toLocaleString(),
+                        new Date(concern.updated_at).toLocaleString()
+                    ]);
+
+                    // Combine headers and rows
+                    const csvContent = [headers.join(','), ...rows.map(row => row.join(','))].join('\n');
+
+                    // Create download
+                    const blob = new Blob([csvContent], { type: 'text/csv;charset=utf-8;' });
+                    const link = document.createElement('a');
+                    const url = URL.createObjectURL(blob);
+                    link.setAttribute('href', url);
+                    link.setAttribute('download', `all_concerns_${new Date().toISOString().split('T')[0]}.csv`);
+                    link.style.visibility = 'hidden';
+                    document.body.appendChild(link);
+                    link.click();
+                    document.body.removeChild(link);
+
+                    showToast(`Exported ${concerns.length} concerns successfully!`, 'success');
+                } else {
+                    showToast('Failed to fetch concerns for export', 'error');
+                }
+            } catch (error) {
+                console.error('Export all concerns error:', error);
+                showToast('Error exporting concerns', 'error');
+            }
         }
 
         // ============= SETTINGS =============
