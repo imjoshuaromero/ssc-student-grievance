@@ -323,12 +323,17 @@
                             </label>
                             <select id="concernCategory" class="select select-bordered w-full focus:select-primary" required>
                                 <option value="">Select a category</option>
-                                <option value="1">Academic</option>
-                                <option value="2">Administrative Decisions</option>
-                                <option value="3">Services & Facilities</option>
-                                <option value="4">Harassment</option>
-                                <option value="5">Others</option>
                             </select>
+                        </div>
+                        
+                        <!-- Other Category Input (hidden by default) -->
+                        <div id="otherCategoryContainer" class="form-control hidden">
+                            <label class="label">
+                                <span class="label-text font-semibold text-sm">
+                                    <i class="fas fa-edit mr-2 text-primary"></i>Specify Category
+                                </span>
+                            </label>
+                            <input type="text" id="otherCategoryInput" class="input input-bordered w-full focus:input-primary" placeholder="Please specify your category..." maxlength="100" />
                         </div>
                         
                         <!-- Office -->
@@ -677,6 +682,28 @@
             // Load categories and offices for the form
             await loadCategories();
             await loadOffices();
+            
+            // Handle "Other" category selection
+            const categorySelect = document.getElementById('concernCategory');
+            const otherContainer = document.getElementById('otherCategoryContainer');
+            const otherInput = document.getElementById('otherCategoryInput');
+            
+            if (categorySelect) {
+                categorySelect.addEventListener('change', function() {
+                    const selectedOption = this.options[this.selectedIndex];
+                    const categoryName = selectedOption.text;
+                    
+                    // Check if "Other:" category is selected
+                    if (categoryName && categoryName.toLowerCase().includes('other')) {
+                        otherContainer.classList.remove('hidden');
+                        otherInput.required = true;
+                    } else {
+                        otherContainer.classList.add('hidden');
+                        otherInput.required = false;
+                        otherInput.value = '';
+                    }
+                });
+            }
 
             // Load notifications initially
             await loadNotifications();
@@ -902,7 +929,7 @@
         // Load categories for the form
         async function loadCategories() {
             try {
-                const response = await fetch(`${API_BASE_URL}/concerns/categories`);
+                const response = await fetch(`${API_BASE_URL}/concerns/categories?t=${Date.now()}`);
                 if (response.ok) {
                     const data = await response.json();
                     const select = document.getElementById('concernCategory');
@@ -921,7 +948,7 @@
         // Load offices for the form
         async function loadOffices() {
             try {
-                const response = await fetch(`${API_BASE_URL}/concerns/offices`);
+                const response = await fetch(`${API_BASE_URL}/concerns/offices?t=${Date.now()}`);
                 if (response.ok) {
                     const data = await response.json();
                     const select = document.getElementById('concernOffice');
@@ -1246,7 +1273,18 @@
                 const formData = new FormData();
                 formData.append('title', document.getElementById('concernTitle').value);
                 formData.append('description', document.getElementById('concernDescription').value);
-                formData.append('category_id', document.getElementById('concernCategory').value);
+                const categoryId = document.getElementById('concernCategory').value;
+                formData.append('category_id', categoryId);
+                
+                // Add other category text if specified
+                const categorySelect = document.getElementById('concernCategory');
+                const selectedCategoryName = categorySelect.options[categorySelect.selectedIndex].text;
+                if (selectedCategoryName && selectedCategoryName.toLowerCase().includes('other')) {
+                    const otherText = document.getElementById('otherCategoryInput').value.trim();
+                    if (otherText) {
+                        formData.append('other_category', otherText);
+                    }
+                }
                 formData.append('assigned_office_id', document.getElementById('concernOffice').value);
                 formData.append('is_anonymous', document.getElementById('isAnonymous').checked);
                 

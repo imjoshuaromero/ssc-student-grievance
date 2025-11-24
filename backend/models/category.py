@@ -10,7 +10,7 @@ class Category:
             SELECT category_id, category_name, description, created_at
             FROM concern_categories
             WHERE is_active = true
-            ORDER BY category_name
+            ORDER BY category_id
         """
         return Database.execute_query(query, fetch_all=True)
     

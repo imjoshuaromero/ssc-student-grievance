@@ -6,17 +6,17 @@ class Concern:
     
     @staticmethod
     def create(student_id, category_id, title, description, assigned_office_id=None,
-               location=None, incident_date=None, is_anonymous=False, priority='normal'):
+               location=None, incident_date=None, is_anonymous=False, priority='normal', other_category=None):
         """Create a new concern"""
         query = """
             INSERT INTO concerns (student_id, category_id, title, description, 
                                 assigned_office_id, location, incident_date, 
-                                is_anonymous, priority, status)
-            VALUES (%s, %s, %s, %s, %s, %s, %s, %s, %s, 'pending')
+                                is_anonymous, priority, status, other_category)
+            VALUES (%s, %s, %s, %s, %s, %s, %s, %s, %s, 'pending', %s)
             RETURNING concern_id, ticket_number, title, status, priority, created_at
         """
         params = (student_id, category_id, title, description, assigned_office_id,
-                 location, incident_date, is_anonymous, priority)
+                 location, incident_date, is_anonymous, priority, other_category)
         result = Database.execute_query(query, params, fetch_one=True)
         
         # Log initial status
@@ -43,7 +43,8 @@ class Concern:
                    cat.description AS category_description,
                    o.office_name,
                    o.contact_email AS office_email,
-                   admin.first_name || ' ' || admin.last_name AS admin_name
+                   admin.first_name || ' ' || admin.last_name AS admin_name,
+                   c.other_category
             FROM concerns c
             JOIN users u ON c.student_id = u.user_id
             JOIN concern_categories cat ON c.category_id = cat.category_id

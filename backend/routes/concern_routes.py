@@ -80,7 +80,8 @@ def create_concern():
             location=data.get('location'),
             incident_date=data.get('incident_date'),
             is_anonymous=is_anonymous,
-            priority=data.get('priority', 'normal')
+            priority=data.get('priority', 'normal'),
+            other_category=data.get('other_category')
         )
         
         if concern:

@@ -1027,9 +1027,13 @@
                         : `${API_BASE_URL}/concerns/categories`;
                     
                     try {
+                        const token = localStorage.getItem('token');
                         const response = await fetch(url, {
                             method: method,
-                            headers: { 'Content-Type': 'application/json' },
+                            headers: {
+                                'Content-Type': 'application/json',
+                                'Authorization': `Bearer ${token}`
+                            },
                             body: JSON.stringify({
                                 category_name: categoryName,
                                 description: categoryDescription
@@ -2278,7 +2282,7 @@
             const grid = document.getElementById('categoriesGrid');
             
             try {
-                const response = await fetch(`${API_BASE_URL}/concerns/categories`, {headers:{'Authorization':`Bearer ${localStorage.getItem('token')}`}});
+                const response = await fetch(`${API_BASE_URL}/concerns/categories?t=${Date.now()}`, {headers:{'Authorization':`Bearer ${localStorage.getItem('token')}`}});
                 const data = await response.json();
                 
                 if (data.categories && data.categories.length > 0) {
