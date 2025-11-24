@@ -169,8 +169,8 @@ SSC-GRIEVANCE-SYSTEM/
 ### 1. Clone the Repository
 
 ```bash
-git clone https://github.com/imjoshuaromero/oop-final-project.git
-cd oop-final-project
+git clone [https://github.com/imjoshuaromero/oop-final-project.git](https://github.com/imjoshuaromero/ssc-student-grievance.git)
+cd ssc-student-grievance
 ```
 
 ### 2. Create Virtual Environment
