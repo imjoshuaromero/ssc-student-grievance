@@ -1,4 +1,4 @@
-from flask import Blueprint, request, jsonify
+from flask import Blueprint, request, jsonify, current_app
 from werkzeug.utils import secure_filename
 import os
 from backend.models.concern import Concern
@@ -16,7 +16,6 @@ from backend.utils.email_service import (
 concern_bp = Blueprint('concern', __name__)
 
 # Configure file uploads
-UPLOAD_FOLDER = 'uploads'
 ALLOWED_EXTENSIONS = {'png', 'jpg', 'jpeg', 'gif', 'pdf', 'doc', 'docx'}
 MAX_FILE_SIZE = 5 * 1024 * 1024  # 5MB
 
@@ -53,7 +52,8 @@ def create_concern():
         # Handle file uploads
         attachment_paths = []
         if files:
-            os.makedirs(UPLOAD_FOLDER, exist_ok=True)
+            upload_folder = current_app.config['UPLOAD_FOLDER']
+            os.makedirs(upload_folder, exist_ok=True)
             for file in files:
                 if file and allowed_file(file.filename):
                     filename = secure_filename(file.filename)
@@ -61,7 +61,7 @@ def create_concern():
                     import time
                     timestamp = str(int(time.time()))
                     filename = f"{timestamp}_{filename}"
-                    filepath = os.path.join(UPLOAD_FOLDER, filename)
+                    filepath = os.path.join(upload_folder, filename)
                     file.save(filepath)
                     attachment_paths.append(filepath)
         
