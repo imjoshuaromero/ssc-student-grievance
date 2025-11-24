@@ -1,0 +1,106 @@
+/* SSC Dark Blue Theme - Inspired by "May Concern Ka Ba?" */
+body, html {
+    margin: 0;
+    padding: 0;
+}
+
+.gradient-bg {
+    background: linear-gradient(135deg, #0f1729 0%, #1a2444 50%, #2d3a7a 100%);
+    position: relative;
+    min-height: 100vh;
+}
+
+.gradient-bg::before {
+    content: '';
+    position: absolute;
+    top: -50%;
+    right: -10%;
+    width: 500px;
+    height: 500px;
+    background: radial-gradient(circle, rgba(93, 108, 219, 0.15) 0%, transparent 70%);
+    border-radius: 50%;
+}
+
+.gradient-bg::after {
+    content: '';
+    position: absolute;
+    bottom: -30%;
+    left: -5%;
+    width: 400px;
+    height: 400px;
+    background: radial-gradient(circle, rgba(45, 58, 122, 0.2) 0%, transparent 70%);
+    border-radius: 50%;
+}
+
+.glass-effect {
+    background: rgba(255, 255, 255, 0.98);
+    backdrop-filter: blur(20px);
+    border: 1px solid rgba(255, 255, 255, 0.3);
+    box-shadow: 0 8px 32px rgba(0, 0, 0, 0.2);
+}
+
+.concern-heading {
+    font-family: 'Arial Black', sans-serif;
+    font-weight: 900;
+    letter-spacing: 2px;
+    text-shadow: 0 4px 12px rgba(0, 0, 0, 0.3);
+}
+
+.ssc-logo-container {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    margin-bottom: 2rem;
+}
+
+.ssc-logo {
+    max-width: 80px;
+    height: auto;
+    filter: drop-shadow(0 4px 12px rgba(255, 255, 255, 0.3));
+}
+
+.ssc-logo-large {
+    max-width: 160px;
+    height: auto;
+    filter: drop-shadow(0 4px 12px rgba(255, 255, 255, 0.3));
+    transform: translate(8px, 10px);
+}
+
+@media (min-width: 768px) {
+    .ssc-logo {
+        max-width: 100px;
+    }
+    
+    .ssc-logo-large {
+        max-width: 190px;
+        transform: translate(30px, 10px);
+    }
+}
+
+@media (min-width: 1024px) {
+    .ssc-logo-large {
+        max-width: 250px;
+        transform: translate(30px, 12px);
+    }
+}
+
+.qr-inspired-border {
+    border: 3px solid rgba(255, 255, 255, 0.2);
+    border-radius: 20px;
+    padding: 1.5rem;
+}
+
+/* Animated shine effect */
+@keyframes shine {
+    0% { background-position: -200% center; }
+    100% { background-position: 200% center; }
+}
+
+.shine-text {
+    background: linear-gradient(90deg, #ffffff 25%, #a5b4fc 50%, #ffffff 75%);
+    background-size: 200% auto;
+    -webkit-background-clip: text;
+    background-clip: text;
+    -webkit-text-fill-color: transparent;
+    animation: shine 3s linear infinite;
+}

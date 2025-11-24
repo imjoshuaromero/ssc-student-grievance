@@ -1,0 +1,3035 @@
+<!DOCTYPE html>
+<html lang="en" data-theme="light">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Admin Dashboard - SSC Grievance System</title>
+
+    <!-- Tailwind CSS -->
+    <script src="https://cdn.tailwindcss.com"></script>
+
+    <!-- DaisyUI -->
+    <link href="https://cdn.jsdelivr.net/npm/daisyui@4.4.19/dist/full.min.css" rel="stylesheet" type="text/css" />
+
+    <!-- Font Awesome -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+
+    <!-- Custom CSS -->
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/styles.css') }}">
+
+    <style>
+        * {
+            box-sizing: border-box;
+            margin: 0;
+            padding: 0;
+        }
+
+        body, html {
+            margin: 0;
+            padding: 0;
+            overflow: hidden;
+            height: 100vh;
+            width: 100vw;
+        }
+
+        .stat-card {
+            background: linear-gradient(135deg, rgba(255,255,255,0.95) 0%, rgba(255,255,255,0.85) 100%);
+            backdrop-filter: blur(20px);
+            border: 1px solid rgba(255,255,255,0.3);
+        }
+
+        .concern-card {
+            background: rgba(255,255,255,0.95);
+            backdrop-filter: blur(20px);
+            border: 1px solid rgba(255,255,255,0.2);
+            transition: all 0.3s ease;
+        }
+
+        .concern-card:hover {
+            transform: translateY(-4px);
+            box-shadow: 0 12px 24px rgba(0,0,0,0.1);
+        }
+
+        .sidebar {
+            background: linear-gradient(180deg, rgba(15,23,41,0.98) 0%, rgba(26,36,68,0.98) 50%, rgba(45,58,122,0.98) 100%);
+            backdrop-filter: blur(20px);
+            position: fixed;
+            top: 0;
+            left: 0;
+            height: 100vh;
+            width: 250px;
+            overflow-y: auto;
+            z-index: 40;
+            flex-shrink: 0;
+        }
+
+        .nav-item {
+            transition: all 0.3s ease;
+            cursor: pointer;
+        }
+
+        .nav-item:hover {
+            background: rgba(255,255,255,0.1);
+            transform: translateX(8px);
+        }
+
+        .nav-item.active {
+            background: rgba(255,255,255,0.15);
+            border-left: 4px solid #6366f1;
+        }
+
+        .main-content {
+            margin-left: 250px;
+            height: 100vh;
+            width: calc(100vw - 250px);
+            overflow-y: auto;
+            overflow-x: hidden;
+            flex-grow: 1;
+        }
+
+        .content-section {
+            display: none;
+        }
+
+        .content-section:not(.hidden) {
+            display: block;
+        }
+
+        /* Responsive Design */
+        @media (max-width: 768px) {
+            .sidebar {
+                left: -250px;
+                transition: left 0.3s ease;
+            }
+            .sidebar.mobile-open {
+                left: 0;
+            }
+            .main-content {
+                margin-left: 0 !important;
+                padding: 0.5rem !important;
+            }
+            .stat-card {
+                min-width: 100% !important;
+            }
+            table {
+                font-size: 0.875rem;
+            }
+            .concern-card {
+                padding: 1rem !important;
+            }
+        }
+
+        @media (min-width: 769px) and (max-width: 1024px) {
+            .sidebar {
+                width: 200px;
+            }
+            .main-content {
+                margin-left: 200px;
+            }
+        }
+
+        .sidebar::-webkit-scrollbar {
+            width: 4px;
+        }
+
+        .sidebar::-webkit-scrollbar-thumb {
+            background: rgba(255,255,255,0.2);
+            border-radius: 2px;
+        }
+
+        .main-content::-webkit-scrollbar {
+            width: 8px;
+        }
+
+        .main-content::-webkit-scrollbar-track {
+            background: rgba(0,0,0,0.1);
+        }
+
+        .main-content::-webkit-scrollbar-thumb {
+            background: rgba(255,255,255,0.3);
+            border-radius: 4px;
+        }
+
+        .main-content::-webkit-scrollbar-thumb:hover {
+            background: rgba(255,255,255,0.5);
+        }
+
+        .status-badge {
+            backdrop-filter: blur(10px);
+        }
+
+        .filter-btn {
+            transition: all 0.3s ease;
+        }
+
+        .filter-btn.active {
+            background: rgba(99, 102, 241, 0.2);
+            border-color: #6366f1;
+        }
+    </style>
+</head>
+<body style="margin: 0; padding: 0; overflow: hidden; height: 100vh; width: 100vw;">
+    <!-- Main Container -->
+    <div class="flex" style="height: 100vh; width: 100vw; overflow: hidden; margin: 0; padding: 0;">
+        <!-- Sidebar -->
+        <aside class="sidebar">
+            <div class="p-6 flex flex-col h-full">
+                <!-- Logo & Branding -->
+                <div class="mb-8">
+                    <div class="flex items-center gap-3 mb-2">
+                        <img src="{{ url_for('static', filename='images/ssc_logo.png') }}"
+                             alt="SSC Logo"
+                             class="w-12 h-12 filter drop-shadow-lg"
+                             onerror="this.style.display='none'">
+                        <div>
+                            <h2 class="text-white font-bold text-lg leading-tight">MAY CONCERN<br>KA BA?</h2>
+                        </div>
+                    </div>
+                    <p class="text-white/70 text-xs">Admin Dashboard</p>
+                </div>
+
+                <!-- Admin Profile -->
+                <div class="bg-white/10 backdrop-blur-sm rounded-2xl p-4 mb-6">
+                    <div class="flex items-center gap-3">
+                        <div class="avatar placeholder">
+                            <div class="bg-error text-white rounded-full w-12 h-12">
+                                <span class="text-lg" id="adminInitials">AD</span>
+                            </div>
+                        </div>
+                        <div class="flex-1 min-w-0">
+                            <h3 class="text-white font-semibold text-sm truncate" id="adminName">Admin User</h3>
+                            <p class="text-white/70 text-xs truncate">Administrator</p>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Navigation -->
+                <nav class="flex-1 space-y-2">
+                    <a href="#" data-section="dashboard" class="nav-item active flex items-center gap-3 px-4 py-3 rounded-xl text-white text-sm">
+                        <i class="fas fa-chart-line text-lg w-5"></i>
+                        <span>Dashboard</span>
+                    </a>
+                    <a href="#" data-section="all-concerns" class="nav-item flex items-center gap-3 px-4 py-3 rounded-xl text-white text-sm">
+                        <i class="fas fa-inbox text-lg w-5"></i>
+                        <span>All Concerns</span>
+                        <span class="badge badge-warning badge-sm ml-auto">12</span>
+                    </a>
+                    <a href="#" data-section="pending" class="nav-item flex items-center gap-3 px-4 py-3 rounded-xl text-white text-sm">
+                        <i class="fas fa-clock text-lg w-5"></i>
+                        <span>Pending</span>
+                        <span class="badge badge-error badge-sm ml-auto">5</span>
+                    </a>
+                    <a href="#" data-section="users" class="nav-item flex items-center gap-3 px-4 py-3 rounded-xl text-white text-sm">
+                        <i class="fas fa-users text-lg w-5"></i>
+                        <span>Users</span>
+                    </a>
+                    <a href="#" data-section="categories" class="nav-item flex items-center gap-3 px-4 py-3 rounded-xl text-white text-sm">
+                        <i class="fas fa-tags text-lg w-5"></i>
+                        <span>Categories</span>
+                    </a>
+                    <a href="#" data-section="reports" class="nav-item flex items-center gap-3 px-4 py-3 rounded-xl text-white text-sm">
+                        <i class="fas fa-file-alt text-lg w-5"></i>
+                        <span>Reports</span>
+                    </a>
+                    <a href="#" data-section="settings" class="nav-item flex items-center gap-3 px-4 py-3 rounded-xl text-white text-sm">
+                        <i class="fas fa-cog text-lg w-5"></i>
+                        <span>Settings</span>
+                    </a>
+                </nav>
+
+                <!-- Logout -->
+                <button id="logoutBtn" class="nav-item flex items-center gap-3 px-4 py-3 rounded-xl text-white text-sm mt-4 w-full hover:bg-red-500/20">
+                    <i class="fas fa-sign-out-alt text-lg w-5"></i>
+                    <span>Logout</span>
+                </button>
+            </div>
+        </aside>
+
+        <!-- Main Content -->
+        <main class="main-content p-4 md:p-6 lg:p-8" style="background: linear-gradient(135deg, #1a1f3a 0%, #2d3a7a 100%);">
+            <!-- Mobile Menu Button -->
+            <button id="mobileMenuToggle" class="md:hidden fixed top-4 left-4 z-50 btn btn-circle btn-primary shadow-lg" aria-label="Toggle menu">
+                <i class="fas fa-bars"></i>
+            </button>
+
+            <!-- Dashboard Section -->
+            <div id="dashboard-section" class="content-section">
+                <!-- Header -->
+                <header class="mb-8">
+                    <div class="flex flex-wrap items-center justify-between gap-4">
+                        <div>
+                            <h1 class="text-3xl lg:text-4xl font-bold text-white mb-2">Admin Dashboard</h1>
+                            <p class="text-white/80 text-sm lg:text-base">Manage and oversee all concerns</p>
+                        </div>
+                        <div class="flex gap-2">
+                            <button class="btn btn-outline btn-sm rounded-xl text-white border-white/30 hover:bg-white/10" aria-label="Export data">
+                                <i class="fas fa-download"></i>
+                                <span class="hidden sm:inline">Export</span>
+                            </button>
+                            <button class="btn btn-primary btn-sm rounded-xl" aria-label="Filter concerns">
+                                <i class="fas fa-filter"></i>
+                                <span class="hidden sm:inline">Filter</span>
+                            </button>
+                        </div>
+                    </div>
+                </header>
+
+                <!-- Stats Cards -->
+                <div class="grid grid-cols-2 lg:grid-cols-5 gap-4 lg:gap-6 mb-8">
+                    <!-- Total Concerns -->
+                    <div class="stat-card rounded-2xl p-4 lg:p-6 shadow-lg">
+                        <div class="flex items-center justify-between mb-3">
+                            <div class="bg-blue-100 p-3 rounded-xl">
+                                <i class="fas fa-inbox text-blue-600 text-xl lg:text-2xl"></i>
+                            </div>
+                        </div>
+                        <h3 class="text-gray-600 text-xs lg:text-sm font-medium mb-1">Total</h3>
+                        <p id="totalConcerns" class="text-2xl lg:text-3xl font-bold text-gray-800">0</p>
+                        <p class="text-xs text-green-600 mt-1">All concerns</p>
+                    </div>
+
+                    <!-- Pending -->
+                    <div class="stat-card rounded-2xl p-4 lg:p-6 shadow-lg">
+                        <div class="flex items-center justify-between mb-3">
+                            <div class="bg-yellow-100 p-3 rounded-xl">
+                                <i class="fas fa-clock text-yellow-600 text-xl lg:text-2xl"></i>
+                            </div>
+                        </div>
+                        <h3 class="text-gray-600 text-xs lg:text-sm font-medium mb-1">Pending</h3>
+                        <p id="pendingConcerns" class="text-2xl lg:text-3xl font-bold text-gray-800">0</p>
+                        <p class="text-xs text-red-600 mt-1">Needs attention</p>
+                    </div>
+
+                    <!-- In Progress -->
+                    <div class="stat-card rounded-2xl p-4 lg:p-6 shadow-lg">
+                        <div class="flex items-center justify-between mb-3">
+                            <div class="bg-purple-100 p-3 rounded-xl">
+                                <i class="fas fa-spinner text-purple-600 text-xl lg:text-2xl"></i>
+                            </div>
+                        </div>
+                        <h3 class="text-gray-600 text-xs lg:text-sm font-medium mb-1">In Progress</h3>
+                        <p id="inProgressConcerns" class="text-2xl lg:text-3xl font-bold text-gray-800">0</p>
+                        <p class="text-xs text-blue-600 mt-1">Being handled</p>
+                    </div>
+
+                    <!-- Resolved -->
+                    <div class="stat-card rounded-2xl p-4 lg:p-6 shadow-lg">
+                        <div class="flex items-center justify-between mb-3">
+                            <div class="bg-green-100 p-3 rounded-xl">
+                                <i class="fas fa-check-circle text-green-600 text-xl lg:text-2xl"></i>
+                            </div>
+                        </div>
+                        <h3 class="text-gray-600 text-xs lg:text-sm font-medium mb-1">Resolved</h3>
+                        <p id="resolvedConcerns" class="text-2xl lg:text-3xl font-bold text-gray-800">0</p>
+                        <p class="text-xs text-green-600 mt-1">Successfully closed</p>
+                    </div>
+
+                    <!-- Active Users -->
+                    <div class="stat-card rounded-2xl p-4 lg:p-6 shadow-lg">
+                        <div class="flex items-center justify-between mb-3">
+                            <div class="bg-indigo-100 p-3 rounded-xl">
+                                <i class="fas fa-users text-indigo-600 text-xl lg:text-2xl"></i>
+                            </div>
+                        </div>
+                        <h3 class="text-gray-600 text-xs lg:text-sm font-medium mb-1">Users</h3>
+                        <p class="text-2xl lg:text-3xl font-bold text-gray-800">42</p>
+                        <p class="text-xs text-gray-500 mt-1">42 students</p>
+                    </div>
+                </div>
+
+                <!-- Recent Concerns -->
+                <section class="mb-8">
+                    <div class="flex items-center justify-between mb-6">
+                        <h2 class="text-xl lg:text-2xl font-bold text-white">Recent Concerns</h2>
+                        <a href="#" data-section="all-concerns" class="text-white/80 hover:text-white text-sm transition-colors view-all-link">View All →</a>
+                    </div>
+
+                    <div class="space-y-4">
+                        <!-- Concern Card 1 -->
+                        <div class="concern-card rounded-2xl p-5 lg:p-6 shadow-lg">
+                            <div class="flex flex-wrap items-start justify-between gap-4 mb-4">
+                                <div class="flex-1 min-w-0">
+                                    <div class="flex items-center gap-2 mb-2">
+                                        <span class="status-badge badge badge-warning badge-sm">Pending</span>
+                                        <span class="text-xs text-gray-500">Submitted by Juan Dela Cruz</span>
+                                        <span class="text-xs text-gray-400">• 2 hours ago</span>
+                                    </div>
+                                    <h3 class="text-base lg:text-lg font-bold text-gray-800 mb-2">Broken Air Conditioning in Room 301</h3>
+                                    <p class="text-sm text-gray-600 line-clamp-2">The air conditioning unit has not been working for the past week, making it difficult to concentrate during classes...</p>
+                                </div>
+                                <div class="flex gap-2">
+                                    <button class="btn btn-primary btn-sm rounded-xl">
+                                        <i class="fas fa-check"></i>
+                                        Assign
+                                    </button>
+                                    <button class="btn btn-ghost btn-sm rounded-xl" aria-label="View concern details">
+                                        <i class="fas fa-eye"></i>
+                                    </button>
+                                </div>
+                            </div>
+                            <div class="flex flex-wrap items-center gap-3 text-xs text-gray-500">
+                                <span class="flex items-center gap-1">
+                                    <i class="fas fa-tag"></i>
+                                    Facilities
+                                </span>
+                                <span class="flex items-center gap-1">
+                                    <i class="fas fa-building"></i>
+                                    Operations Office
+                                </span>
+                                <span class="flex items-center gap-1">
+                                    <i class="fas fa-exclamation-circle text-orange-500"></i>
+                                    High Priority
+                                </span>
+                            </div>
+                        </div>
+
+                        <!-- Concern Card 2 -->
+                        <div class="concern-card rounded-2xl p-5 lg:p-6 shadow-lg">
+                            <div class="flex flex-wrap items-start justify-between gap-4 mb-4">
+                                <div class="flex-1 min-w-0">
+                                    <div class="flex items-center gap-2 mb-2">
+                                        <span class="status-badge badge badge-info badge-sm">In Progress</span>
+                                        <span class="text-xs text-gray-500">Submitted by Maria Santos</span>
+                                        <span class="text-xs text-gray-400">• 5 hours ago</span>
+                                    </div>
+                                    <h3 class="text-base lg:text-lg font-bold text-gray-800 mb-2">Library Book Shortage</h3>
+                                    <p class="text-sm text-gray-600 line-clamp-2">There are insufficient copies of required textbooks in the library for students to borrow...</p>
+                                </div>
+                                <div class="flex gap-2">
+                                    <button class="btn btn-success btn-sm rounded-xl">
+                                        <i class="fas fa-check-circle"></i>
+                                        Resolve
+                                    </button>
+                                    <button class="btn btn-ghost btn-sm rounded-xl" aria-label="View concern details">
+                                        <i class="fas fa-eye"></i>
+                                    </button>
+                                </div>
+                            </div>
+                            <div class="flex flex-wrap items-center gap-3 text-xs text-gray-500">
+                                <span class="flex items-center gap-1">
+                                    <i class="fas fa-tag"></i>
+                                    Academic
+                                </span>
+                                <span class="flex items-center gap-1">
+                                    <i class="fas fa-building"></i>
+                                    Library
+                                </span>
+                                <span class="flex items-center gap-1">
+                                    <i class="fas fa-user"></i>
+                                    Assigned to Admin 1
+                                </span>
+                            </div>
+                        </div>
+
+                        <!-- Concern Card 3 -->
+                        <div class="concern-card rounded-2xl p-5 lg:p-6 shadow-lg">
+                            <div class="flex flex-wrap items-start justify-between gap-4 mb-4">
+                                <div class="flex-1 min-w-0">
+                                    <div class="flex items-center gap-2 mb-2">
+                                        <span class="status-badge badge badge-success badge-sm">Resolved</span>
+                                        <span class="text-xs text-gray-500">Submitted by Pedro Cruz</span>
+                                        <span class="text-xs text-gray-400">• 1 day ago</span>
+                                    </div>
+                                    <h3 class="text-base lg:text-lg font-bold text-gray-800 mb-2">Wifi Connection Issues</h3>
+                                    <p class="text-sm text-gray-600 line-clamp-2">Internet connectivity in the student lounge has been very unstable...</p>
+                                </div>
+                                <button class="btn btn-ghost btn-sm rounded-xl" aria-label="View concern details">
+                                    <i class="fas fa-eye"></i>
+                                </button>
+                            </div>
+                            <div class="flex flex-wrap items-center gap-3 text-xs text-gray-500">
+                                <span class="flex items-center gap-1">
+                                    <i class="fas fa-tag"></i>
+                                    Technology
+                                </span>
+                                <span class="flex items-center gap-1">
+                                    <i class="fas fa-building"></i>
+                                    IT Office
+                                </span>
+                                <span class="flex items-center gap-1">
+                                    <i class="fas fa-check-circle text-green-500"></i>
+                                    Completed
+                                </span>
+                            </div>
+                        </div>
+                    </div>
+                </section>
+
+                <!-- Quick Stats -->
+                <section>
+                    <h2 class="text-xl lg:text-2xl font-bold text-white mb-6">By Category</h2>
+                    <div class="grid grid-cols-2 lg:grid-cols-4 gap-4">
+                        <div class="stat-card rounded-2xl p-5 shadow-lg">
+                            <div class="flex items-center gap-3 mb-3">
+                                <div class="bg-blue-100 p-2 rounded-lg">
+                                    <i class="fas fa-wrench text-blue-600 text-xl"></i>
+                                </div>
+                                <div>
+                                    <h3 class="font-bold text-gray-800 text-sm">Facilities</h3>
+                                    <p class="text-xs text-gray-600">42 concerns</p>
+                                </div>
+                            </div>
+                            <div class="text-xs text-gray-500">12 pending</div>
+                        </div>
+
+                        <div class="stat-card rounded-2xl p-5 shadow-lg">
+                            <div class="flex items-center gap-3 mb-3">
+                                <div class="bg-purple-100 p-2 rounded-lg">
+                                    <i class="fas fa-book text-purple-600 text-xl"></i>
+                                </div>
+                                <div>
+                                    <h3 class="font-bold text-gray-800 text-sm">Academic</h3>
+                                    <p class="text-xs text-gray-600">38 concerns</p>
+                                </div>
+                            </div>
+                            <div class="text-xs text-gray-500">8 pending</div>
+                        </div>
+
+                        <div class="stat-card rounded-2xl p-5 shadow-lg">
+                            <div class="flex items-center gap-3 mb-3">
+                                <div class="bg-green-100 p-2 rounded-lg">
+                                    <i class="fas fa-laptop text-green-600 text-xl"></i>
+                                </div>
+                                <div>
+                                    <h3 class="font-bold text-gray-800 text-sm">Technology</h3>
+                                    <p class="text-xs text-gray-600">35 concerns</p>
+                                </div>
+                            </div>
+                            <div class="text-xs text-gray-500">5 pending</div>
+                        </div>
+
+                        <div class="stat-card rounded-2xl p-5 shadow-lg">
+                            <div class="flex items-center gap-3 mb-3">
+                                <div class="bg-orange-100 p-2 rounded-lg">
+                                    <i class="fas fa-ellipsis-h text-orange-600 text-xl"></i>
+                                </div>
+                                <div>
+                                    <h3 class="font-bold text-gray-800 text-sm">Other</h3>
+                                    <p class="text-xs text-gray-600">41 concerns</p>
+                                </div>
+                            </div>
+                            <div class="text-xs text-gray-500">3 pending</div>
+                        </div>
+                    </div>
+                </section>
+            </div>
+
+            <!-- All Concerns Section -->
+            <div id="all-concerns-section" class="content-section hidden">
+                <header class="mb-8">
+                    <div class="flex flex-wrap items-center justify-between gap-4">
+                        <div>
+                            <h1 class="text-3xl lg:text-4xl font-bold text-white mb-2">All Concerns</h1>
+                            <p class="text-white/80 text-sm lg:text-base">Manage all submitted concerns</p>
+                        </div>
+                        <button class="btn btn-primary rounded-2xl gap-2">
+                            <i class="fas fa-download"></i>
+                            Export Data
+                        </button>
+                    </div>
+                </header>
+
+                <!-- Filters -->
+                <div class="stat-card rounded-2xl p-4 mb-6 shadow-lg">
+                    <div class="flex flex-wrap gap-3 items-center">
+                        <select id="adminFilterStatus" class="select select-sm select-bordered" aria-label="Filter by status">
+                            <option value="">All Status</option>
+                            <option value="pending">Pending</option>
+                            <option value="in_progress">In Progress</option>
+                            <option value="resolved">Resolved</option>
+                            <option value="closed">Closed</option>
+                        </select>
+                        <select id="adminFilterCategory" class="select select-sm select-bordered" aria-label="Filter by category">
+                            <option value="">All Categories</option>
+                            <option value="1">Academic</option>
+                            <option value="2">Administrative</option>
+                            <option value="3">Facilities</option>
+                            <option value="4">Harassment</option>
+                            <option value="5">Others</option>
+                        </select>
+                        <input type="text" id="adminSearchConcerns" placeholder="Search..." class="input input-sm input-bordered flex-1 min-w-[200px]" />
+                        <button id="adminApplyFilters" class="btn btn-sm btn-primary">
+                            <i class="fas fa-filter mr-1"></i>Apply
+                        </button>
+                    </div>
+                </div>
+
+                <!-- Concerns Table -->
+                <div class="stat-card rounded-2xl p-6 shadow-lg overflow-x-auto">
+                    <table class="table table-zebra w-full">
+                        <thead>
+                            <tr>
+                                <th>ID</th>
+                                <th>Title</th>
+                                <th>Student</th>
+                                <th>Category</th>
+                                <th>Status</th>
+                                <th>Priority</th>
+                                <th>Date</th>
+                                <th>Actions</th>
+                            </tr>
+                        </thead>
+                        <tbody id="adminConcernsTableBody">
+                            <tr>
+                                <td colspan="8" class="text-center py-12">
+                                    <div class="loading loading-spinner loading-lg text-primary"></div>
+                                    <p class="mt-4 text-gray-600">Loading concerns...</p>
+                                </td>
+                            </tr>
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+
+            <!-- Pending Section -->
+            <div id="pending-section" class="content-section hidden">
+                <header class="mb-8">
+                    <h1 class="text-3xl lg:text-4xl font-bold text-white mb-2">Pending Concerns</h1>
+                    <p class="text-white/80 text-sm lg:text-base">Review and assign pending concerns</p>
+                </header>
+
+                <div id="pendingConcernsList" class="space-y-4">
+                    <div class="text-center py-12">
+                        <div class="loading loading-spinner loading-lg text-primary"></div>
+                        <p class="text-white mt-4">Loading pending concerns...</p>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Users Section -->
+            <div id="users-section" class="content-section hidden">
+                <header class="mb-8">
+                    <div class="flex flex-wrap items-center justify-between gap-4">
+                        <div>
+                            <h1 class="text-3xl lg:text-4xl font-bold text-white mb-2">User Management</h1>
+                            <p class="text-white/80 text-sm lg:text-base">Manage students and admin accounts</p>
+                        </div>
+                        <button class="btn btn-primary rounded-2xl gap-2" onclick="alert('Add user feature coming soon!')">
+                            <i class="fas fa-user-plus"></i>
+                            Add User
+                        </button>
+                    </div>
+                </header>
+
+                <!-- Search -->
+                <div class="stat-card rounded-2xl p-4 mb-6 shadow-lg">
+                    <div class="flex gap-3">
+                        <input type="text" id="searchUsers" placeholder="Search users by name or SR-Code..." class="input input-bordered flex-1" />
+                        <button class="btn btn-primary">
+                            <i class="fas fa-search"></i>
+                        </button>
+                    </div>
+                </div>
+
+                <!-- Users Table -->
+                <div class="stat-card rounded-2xl p-6 shadow-lg overflow-x-auto">
+                    <table class="table table-zebra w-full">
+                        <thead>
+                            <tr>
+                                <th>ID</th>
+                                <th>Name</th>
+                                <th>SR-Code/Email</th>
+                                <th>Role</th>
+                                <th>Concerns Filed</th>
+                                <th>Status</th>
+                                <th>Actions</th>
+                            </tr>
+                        </thead>
+                        <tbody id="usersTableBody">
+                            <tr>
+                                <td colspan="7" class="text-center py-12">
+                                    <div class="loading loading-spinner loading-lg text-primary"></div>
+                                    <p class="mt-4 text-gray-600">Loading users...</p>
+                                </td>
+                            </tr>
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+
+            <!-- Categories Section -->
+            <div id="categories-section" class="content-section hidden">
+                <header class="mb-8">
+                    <div class="flex flex-wrap items-center justify-between gap-4">
+                        <div>
+                            <h1 class="text-3xl lg:text-4xl font-bold text-white mb-2">Categories</h1>
+                            <p class="text-white/80 text-sm lg:text-base">Manage concern categories</p>
+                        </div>
+                        <button class="btn btn-primary rounded-2xl gap-2" onclick="openAddCategoryModal()">
+                            <i class="fas fa-plus"></i>
+                            Add Category
+                        </button>
+                    </div>
+                </header>
+                
+                <!-- Alert Container -->
+                <div id="categoryAlertContainer" class="mb-4"></div>
+                
+                <!-- Categories Grid -->
+                <div id="categoriesGrid" class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+                    <div class="text-center py-12 col-span-full">
+                        <div class="loading loading-spinner loading-lg text-primary"></div>
+                        <p class="text-white mt-4">Loading categories...</p>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Reports Section -->
+            <div id="reports-section" class="content-section hidden">
+                <header class="mb-8">
+                    <h1 class="text-3xl lg:text-4xl font-bold text-white mb-2">Reports & Analytics</h1>
+                    <p class="text-white/80 text-sm lg:text-base">View detailed reports and statistics</p>
+                </header>
+
+                <!-- Date Range Filter -->
+                <div class="stat-card rounded-2xl p-6 shadow-lg mb-6">
+                    <h3 class="text-lg font-bold text-gray-800 mb-4">Filter by Date Range</h3>
+                    <div class="grid grid-cols-1 md:grid-cols-3 gap-4">
+                        <div>
+                            <label class="block text-sm font-medium text-gray-700 mb-2">Start Date</label>
+                            <input type="date" id="reportStartDate" class="input input-bordered w-full">
+                        </div>
+                        <div>
+                            <label class="block text-sm font-medium text-gray-700 mb-2">End Date</label>
+                            <input type="date" id="reportEndDate" class="input input-bordered w-full">
+                        </div>
+                        <div class="flex items-end">
+                            <button class="btn btn-primary w-full" onclick="generateReports()">
+                                <i class="fas fa-chart-line mr-2"></i>Generate Report
+                            </button>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Statistics Cards -->
+                <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 mb-6">
+                    <div class="stat-card rounded-2xl p-6 shadow-lg">
+                        <div class="flex items-center justify-between">
+                            <div>
+                                <p class="text-sm text-gray-600 mb-1">Total Concerns</p>
+                                <p id="reportTotalConcerns" class="text-3xl font-bold text-blue-600">0</p>
+                            </div>
+                            <div class="bg-blue-100 p-4 rounded-xl">
+                                <i class="fas fa-clipboard-list text-blue-600 text-2xl"></i>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="stat-card rounded-2xl p-6 shadow-lg">
+                        <div class="flex items-center justify-between">
+                            <div>
+                                <p class="text-sm text-gray-600 mb-1">Resolved Rate</p>
+                                <p id="reportResolvedRate" class="text-3xl font-bold text-green-600">0%</p>
+                            </div>
+                            <div class="bg-green-100 p-4 rounded-xl">
+                                <i class="fas fa-check-circle text-green-600 text-2xl"></i>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="stat-card rounded-2xl p-6 shadow-lg">
+                        <div class="flex items-center justify-between">
+                            <div>
+                                <p class="text-sm text-gray-600 mb-1">Avg. Resolution Time</p>
+                                <p id="reportAvgTime" class="text-3xl font-bold text-purple-600">0d</p>
+                            </div>
+                            <div class="bg-purple-100 p-4 rounded-xl">
+                                <i class="fas fa-clock text-purple-600 text-2xl"></i>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="stat-card rounded-2xl p-6 shadow-lg">
+                        <div class="flex items-center justify-between">
+                            <div>
+                                <p class="text-sm text-gray-600 mb-1">Active Users</p>
+                                <p id="reportActiveUsers" class="text-3xl font-bold text-orange-600">0</p>
+                            </div>
+                            <div class="bg-orange-100 p-4 rounded-xl">
+                                <i class="fas fa-users text-orange-600 text-2xl"></i>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Charts -->
+                <div class="grid grid-cols-1 lg:grid-cols-2 gap-6">
+                    <!-- Status Distribution -->
+                    <div class="stat-card rounded-2xl p-6 shadow-lg">
+                        <h3 class="text-lg font-bold text-gray-800 mb-4">Status Distribution</h3>
+                        <div id="statusChart" class="space-y-3">
+                            <!-- Will be populated by JS -->
+                        </div>
+                    </div>
+
+                    <!-- Category Distribution -->
+                    <div class="stat-card rounded-2xl p-6 shadow-lg">
+                        <h3 class="text-lg font-bold text-gray-800 mb-4">Top Categories</h3>
+                        <div id="categoryChart" class="space-y-3">
+                            <!-- Will be populated by JS -->
+                        </div>
+                    </div>
+
+                    <!-- Priority Distribution -->
+                    <div class="stat-card rounded-2xl p-6 shadow-lg">
+                        <h3 class="text-lg font-bold text-gray-800 mb-4">Priority Distribution</h3>
+                        <div id="priorityChart" class="space-y-3">
+                            <!-- Will be populated by JS -->
+                        </div>
+                    </div>
+
+                    <!-- Monthly Trend -->
+                    <div class="stat-card rounded-2xl p-6 shadow-lg">
+                        <h3 class="text-lg font-bold text-gray-800 mb-4">Monthly Submissions</h3>
+                        <div id="monthlyChart" class="space-y-2">
+                            <!-- Will be populated by JS -->
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Export Options -->
+                <div class="stat-card rounded-2xl p-6 shadow-lg mt-6">
+                    <h3 class="text-lg font-bold text-gray-800 mb-4">Export Report</h3>
+                    <div class="flex gap-4">
+                        <button class="btn btn-outline gap-2" onclick="exportReportCSV()">
+                            <i class="fas fa-file-csv"></i>Export as CSV
+                        </button>
+                        <button class="btn btn-outline gap-2" onclick="exportReportPDF()">
+                            <i class="fas fa-file-pdf"></i>Export as PDF
+                        </button>
+                        <button class="btn btn-outline gap-2" onclick="printReport()">
+                            <i class="fas fa-print"></i>Print Report
+                        </button>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Settings Section -->
+            <div id="settings-section" class="content-section hidden">
+                <header class="mb-8">
+                    <h1 class="text-3xl lg:text-4xl font-bold text-white mb-2">System Settings</h1>
+                    <p class="text-white/80 text-sm lg:text-base">Configure system preferences</p>
+                </header>
+
+                <!-- Profile Settings -->
+                <div class="stat-card rounded-2xl p-6 shadow-lg mb-6">
+                    <h3 class="text-lg font-bold text-gray-800 mb-4 flex items-center gap-2">
+                        <i class="fas fa-user-circle"></i>Profile Settings
+                    </h3>
+                    <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+                        <div>
+                            <label class="block text-sm font-medium text-gray-700 mb-2">First Name</label>
+                            <input type="text" id="settingsFirstName" class="input input-bordered w-full" placeholder="First Name">
+                        </div>
+                        <div>
+                            <label class="block text-sm font-medium text-gray-700 mb-2">Last Name</label>
+                            <input type="text" id="settingsLastName" class="input input-bordered w-full" placeholder="Last Name">
+                        </div>
+                        <div>
+                            <label class="block text-sm font-medium text-gray-700 mb-2">Email</label>
+                            <input type="email" id="settingsEmail" class="input input-bordered w-full" placeholder="Email" disabled>
+                        </div>
+                        <div>
+                            <label class="block text-sm font-medium text-gray-700 mb-2">SR Code</label>
+                            <input type="text" id="settingsSrCode" class="input input-bordered w-full" placeholder="SR Code" disabled>
+                        </div>
+                    </div>
+                    <button class="btn btn-primary mt-4" onclick="updateProfile()">
+                        <i class="fas fa-save mr-2"></i>Save Profile Changes
+                    </button>
+                </div>
+
+                <!-- Password Change -->
+                <div class="stat-card rounded-2xl p-6 shadow-lg mb-6">
+                    <h3 class="text-lg font-bold text-gray-800 mb-4 flex items-center gap-2">
+                        <i class="fas fa-lock"></i>Change Password
+                    </h3>
+                    <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+                        <div>
+                            <label class="block text-sm font-medium text-gray-700 mb-2">Current Password</label>
+                            <input type="password" id="currentPassword" class="input input-bordered w-full" placeholder="Enter current password">
+                        </div>
+                        <div></div>
+                        <div>
+                            <label class="block text-sm font-medium text-gray-700 mb-2">New Password</label>
+                            <input type="password" id="newPassword" class="input input-bordered w-full" placeholder="Enter new password">
+                        </div>
+                        <div>
+                            <label class="block text-sm font-medium text-gray-700 mb-2">Confirm New Password</label>
+                            <input type="password" id="confirmPassword" class="input input-bordered w-full" placeholder="Confirm new password">
+                        </div>
+                    </div>
+                    <button class="btn btn-primary mt-4" onclick="changePassword()">
+                        <i class="fas fa-key mr-2"></i>Update Password
+                    </button>
+                </div>
+
+                <!-- Email Notifications -->
+                <div class="stat-card rounded-2xl p-6 shadow-lg mb-6">
+                    <h3 class="text-lg font-bold text-gray-800 mb-4 flex items-center gap-2">
+                        <i class="fas fa-envelope"></i>Email Notifications
+                    </h3>
+                    <div class="space-y-3">
+                        <label class="flex items-center gap-3 cursor-pointer">
+                            <input type="checkbox" id="notifyNewConcern" class="checkbox checkbox-primary" checked>
+                            <span class="text-gray-700">Notify me when a new concern is submitted</span>
+                        </label>
+                        <label class="flex items-center gap-3 cursor-pointer">
+                            <input type="checkbox" id="notifyStatusChange" class="checkbox checkbox-primary" checked>
+                            <span class="text-gray-700">Notify me when concern status changes</span>
+                        </label>
+                        <label class="flex items-center gap-3 cursor-pointer">
+                            <input type="checkbox" id="notifyNewComment" class="checkbox checkbox-primary" checked>
+                            <span class="text-gray-700">Notify me when new comments are added</span>
+                        </label>
+                        <label class="flex items-center gap-3 cursor-pointer">
+                            <input type="checkbox" id="notifyDailySummary" class="checkbox checkbox-primary">
+                            <span class="text-gray-700">Send daily summary report</span>
+                        </label>
+                    </div>
+                    <button class="btn btn-primary mt-4" onclick="saveNotificationSettings()">
+                        <i class="fas fa-bell mr-2"></i>Save Notification Settings
+                    </button>
+                </div>
+
+                <!-- System Preferences -->
+                <div class="stat-card rounded-2xl p-6 shadow-lg">
+                    <h3 class="text-lg font-bold text-gray-800 mb-4 flex items-center gap-2">
+                        <i class="fas fa-cog"></i>System Preferences
+                    </h3>
+                    <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+                        <div>
+                            <label class="block text-sm font-medium text-gray-700 mb-2">Items Per Page</label>
+                            <select id="itemsPerPage" class="select select-bordered w-full">
+                                <option value="10">10</option>
+                                <option value="25" selected>25</option>
+                                <option value="50">50</option>
+                                <option value="100">100</option>
+                            </select>
+                        </div>
+                        <div>
+                            <label class="block text-sm font-medium text-gray-700 mb-2">Default View</label>
+                            <select id="defaultView" class="select select-bordered w-full">
+                                <option value="dashboard" selected>Dashboard</option>
+                                <option value="all-concerns">All Concerns</option>
+                                <option value="pending">Pending Concerns</option>
+                            </select>
+                        </div>
+                    </div>
+                    <button class="btn btn-primary mt-4" onclick="saveSystemPreferences()">
+                        <i class="fas fa-save mr-2"></i>Save Preferences
+                    </button>
+                </div>
+            </div>
+        </main>
+    </div>
+
+    <!-- Auth JS -->
+    <script src="{{ url_for('static', filename='js/auth.js') }}"></script>
+
+    <script>
+        // Prevent multiple executions
+        let isProcessing = false;
+        
+        // Check authentication on page load
+        document.addEventListener('DOMContentLoaded', async () => {
+            if (isProcessing) return;
+            isProcessing = true;
+            
+            // Handle Google OAuth callback FIRST
+            const urlParams = new URLSearchParams(window.location.search);
+            const googleLogin = urlParams.get('google_login');
+            const urlToken = urlParams.get('token');
+            
+            if (googleLogin === 'true' && urlToken) {
+                console.log('Processing Google login callback...');
+                localStorage.setItem('token', urlToken);
+                
+                // Fetch user data with the new token
+                try {
+                    const response = await fetch(`${API_BASE_URL}/users/profile`, {
+                        headers: {
+                            'Authorization': `Bearer ${urlToken}`
+                        }
+                    });
+                    
+                    if (response.ok) {
+                        const data = await response.json();
+                        const userData = data.user || data;
+                        localStorage.setItem('user', JSON.stringify(userData));
+                        console.log('Google login successful!', userData);
+                    } else {
+                        console.error('Failed to fetch user data');
+                        localStorage.clear();
+                        window.location.replace('/login');
+                        return;
+                    }
+                } catch (error) {
+                    console.error('Error fetching user data:', error);
+                    localStorage.clear();
+                    window.location.replace('/login');
+                    return;
+                }
+                
+                // Clean up URL and stop here
+                const cleanUrl = window.location.origin + window.location.pathname;
+                window.history.replaceState({}, document.title, cleanUrl);
+            }
+            
+            // Now check authentication
+            const token = localStorage.getItem('token');
+            const userStr = localStorage.getItem('user');
+            
+            if (!token || !userStr) {
+                console.log('No token or user data, redirecting to login');
+                window.location.replace('/login');
+                return;
+            }
+            
+            const user = JSON.parse(userStr);
+            
+            if (!user.user_id) {
+                console.log('Invalid user data, redirecting to login');
+                localStorage.clear();
+                window.location.replace('/login');
+                return;
+            }
+
+            // Check if user is an admin
+            if (user.role !== 'admin') {
+                console.log('User is not an admin, redirecting');
+                window.location.replace(user.role === 'student' ? '/student-dashboard' : '/login');
+                return;
+            }
+
+            // Update admin info in sidebar
+            if (user.first_name && user.last_name) {
+                document.getElementById('adminName').textContent = `${user.first_name} ${user.last_name}`;
+                document.getElementById('adminInitials').textContent =
+                    `${user.first_name[0]}${user.last_name[0]}`.toUpperCase();
+            }
+
+            // Load dashboard data
+            await loadDashboardData();
+
+            // Show dashboard section by default
+            showSection('dashboard');
+
+            // Set dashboard nav as active
+            const dashboardNav = document.querySelector('[data-section="dashboard"]');
+            if (dashboardNav) {
+                dashboardNav.classList.add('active');
+            }
+
+            // Mobile menu toggle
+            const mobileMenuToggle = document.getElementById('mobileMenuToggle');
+            const sidebar = document.querySelector('.sidebar');
+
+            if (mobileMenuToggle && sidebar) {
+                mobileMenuToggle.addEventListener('click', () => {
+                    sidebar.classList.toggle('mobile-open');
+                });
+
+                // Close sidebar when clicking outside on mobile
+                document.addEventListener('click', (e) => {
+                    if (window.innerWidth <= 768 &&
+                        !sidebar.contains(e.target) &&
+                        !mobileMenuToggle.contains(e.target) &&
+                        sidebar.classList.contains('mobile-open')) {
+                        sidebar.classList.remove('mobile-open');
+                    }
+                });
+            }
+
+            // Add filter button listener
+            const applyFiltersBtn = document.getElementById('adminApplyFilters');
+            if (applyFiltersBtn) {
+                applyFiltersBtn.addEventListener('click', applyFilters);
+            }
+
+            // Add search listener with debounce
+            const searchInput = document.getElementById('adminSearchConcerns');
+            if (searchInput) {
+                let searchTimeout;
+                searchInput.addEventListener('input', function() {
+                    clearTimeout(searchTimeout);
+                    searchTimeout = setTimeout(applyFilters, 500);
+                });
+            }
+
+            // Add user search listener
+            const userSearchInput = document.getElementById('userSearch');
+            if (userSearchInput) {
+                let userSearchTimeout;
+                userSearchInput.addEventListener('input', function() {
+                    clearTimeout(userSearchTimeout);
+                    userSearchTimeout = setTimeout(filterUsers, 500);
+                });
+            }
+
+            // Load offices for modal assignment dropdown
+            loadOffices();
+
+            // Logout functionality
+            const logoutBtn = document.getElementById('logoutBtn');
+            if (logoutBtn) {
+                logoutBtn.addEventListener('click', () => {
+                    logout();
+                });
+            }
+
+            // Navigation handling
+            document.querySelectorAll('.nav-item').forEach(item => {
+                item.addEventListener('click', function(e) {
+                    e.preventDefault();
+
+                    if (this.id !== 'logoutBtn') {
+                        const section = this.getAttribute('data-section');
+
+                        // Update active nav item
+                        document.querySelectorAll('.nav-item').forEach(nav => nav.classList.remove('active'));
+                        this.classList.add('active');
+
+                        // Show corresponding section
+                        showSection(section);
+                    }
+                });
+            });
+
+            // View All link
+            document.querySelectorAll('.view-all-link').forEach(link => {
+                link.addEventListener('click', function(e) {
+                    e.preventDefault();
+                    const section = this.getAttribute('data-section');
+                    showSection(section);
+
+                    // Update nav active state
+                    document.querySelectorAll('.nav-item').forEach(nav => {
+                        nav.classList.remove('active');
+                        if (nav.getAttribute('data-section') === section) {
+                            nav.classList.add('active');
+                        }
+                    });
+                });
+            });
+
+            // Handle category form submission
+            const categoryForm = document.getElementById('categoryForm');
+            if (categoryForm) {
+                categoryForm.addEventListener('submit', async function(e) {
+                    e.preventDefault();
+                    
+                    const categoryId = document.getElementById('categoryId').value;
+                    const categoryName = document.getElementById('categoryName').value;
+                    const categoryDescription = document.getElementById('categoryDescription').value;
+                    
+                    const method = categoryId ? 'PUT' : 'POST';
+                    const url = categoryId 
+                        ? `${API_BASE_URL}/concerns/categories/${categoryId}`
+                        : `${API_BASE_URL}/concerns/categories`;
+                    
+                    try {
+                        const response = await fetch(url, {
+                            method: method,
+                            headers: { 'Content-Type': 'application/json' },
+                            body: JSON.stringify({
+                                category_name: categoryName,
+                                description: categoryDescription
+                            })
+                        });
+                        
+                        if (response.ok) {
+                            showCategoryAlert(
+                                categoryId ? 'Category updated successfully!' : 'Category created successfully!',
+                                'success'
+                            );
+                            closeCategoryModal();
+                            await loadCategories();
+                        } else {
+                            const data = await response.json();
+                            showCategoryAlert(data.error || 'Failed to save category', 'error');
+                        }
+                    } catch (error) {
+                        console.error('Error saving category:', error);
+                        showCategoryAlert('Failed to save category', 'error');
+                    }
+                });
+            }
+        });
+
+        // Load dashboard data
+        async function loadDashboardData() {
+            const token = localStorage.getItem('token');
+
+            try {
+                console.log('Starting to load dashboard data...');
+                
+                // Fetch concerns
+                const concernsResponse = await fetch(`${API_BASE_URL}/concerns/`, {
+                    headers: { 'Authorization': `Bearer ${token}` }
+                });
+
+                // Fetch users count
+                const usersResponse = await fetch(`${API_BASE_URL}/users/`, {
+                    headers: { 'Authorization': `Bearer ${token}` }
+                });
+
+                console.log('Response received:', concernsResponse.status);
+
+                if (concernsResponse.ok) {
+                    const concerns = await concernsResponse.json();
+                    console.log('Concerns data:', concerns);
+
+                    // Count all statuses
+                    const statusCounts = {
+                        total: concerns.length,
+                        pending: 0,
+                        'in-review': 0,
+                        'in-progress': 0,
+                        resolved: 0,
+                        closed: 0
+                    };
+
+                    concerns.forEach(c => {
+                        if (statusCounts.hasOwnProperty(c.status)) {
+                            statusCounts[c.status]++;
+                        }
+                    });
+
+                    // Combine in-review and in-progress for "In Progress" display
+                    const inProgressTotal = statusCounts['in-review'] + statusCounts['in-progress'];
+
+                    console.log('Status counts:', statusCounts);
+
+                    // Update dashboard stats
+                    const totalEl = document.getElementById('totalConcerns');
+                    const pendingEl = document.getElementById('pendingConcerns');
+                    const inProgressEl = document.getElementById('inProgressConcerns');
+                    const resolvedEl = document.getElementById('resolvedConcerns');
+
+                    if (totalEl) totalEl.textContent = statusCounts.total;
+                    if (pendingEl) pendingEl.textContent = statusCounts.pending;
+                    if (inProgressEl) inProgressEl.textContent = inProgressTotal;
+                    if (resolvedEl) resolvedEl.textContent = statusCounts.resolved;
+
+                    // Update users count
+                    if (usersResponse.ok) {
+                        const users = await usersResponse.json();
+                        // Filter out admin users, only count students
+                        const studentCount = Array.isArray(users) ? users.filter(u => u.role !== 'admin').length : 0;
+                        const userCountEls = document.querySelectorAll('.text-2xl.lg\\:text-3xl.font-bold.text-gray-800');
+                        if (userCountEls[4]) {
+                            userCountEls[4].textContent = studentCount;
+                        }
+                        // Update the subtitle
+                        const studentCountText = document.querySelector('.stat-card:nth-child(5) .text-xs.text-gray-500');
+                        if (studentCountText) {
+                            studentCountText.textContent = `${studentCount} students`;
+                        }
+                    }
+
+                    // Update navigation badges
+                    updateNavigationBadges(concerns);
+
+                    console.log('Dashboard stats updated successfully!');
+                } else {
+                    console.error('Failed to load concerns - Status:', concernsResponse.status);
+                }
+            } catch (error) {
+                console.error('Error loading concerns:', error);
+            }
+        }
+
+        // Update navigation badges
+        function updateNavigationBadges(concerns) {
+            const totalCount = concerns.length;
+            const pendingCount = concerns.filter(c => c.status === 'pending').length;
+
+            // Update All Concerns badge
+            const allConcernsBadge = document.querySelector('[data-section="all-concerns"] .badge');
+            if (allConcernsBadge) {
+                allConcernsBadge.textContent = totalCount;
+            }
+
+            // Update Pending badge
+            const pendingBadge = document.querySelector('[data-section="pending"] .badge');
+            if (pendingBadge) {
+                pendingBadge.textContent = pendingCount;
+            }
+        }
+
+        // Function to show specific section
+        function showSection(sectionName) {
+            console.log('Showing section:', sectionName);
+
+            // Hide all sections
+            document.querySelectorAll('.content-section').forEach(section => {
+                section.classList.add('hidden');
+                section.style.display = 'none';
+            });
+
+            // Show selected section
+            const targetSection = document.getElementById(`${sectionName}-section`);
+            console.log('Target section:', targetSection);
+
+            if (targetSection) {
+                targetSection.classList.remove('hidden');
+                targetSection.style.display = 'block';
+
+                // Load data for specific sections
+                if (sectionName === 'all-concerns') {
+                    loadAllAdminConcerns();
+                } else if (sectionName === 'pending') {
+                    loadPendingConcerns();
+                } else if (sectionName === 'users') {
+                    loadUsers();
+                } else if (sectionName === 'categories') {
+                    loadCategories();
+                } else if (sectionName === 'reports') {
+                    // Set default dates if not set
+                    if (!document.getElementById('reportStartDate').value) {
+                        const endDate = new Date();
+                        const startDate = new Date();
+                        startDate.setDate(startDate.getDate() - 30);
+                        document.getElementById('reportEndDate').valueAsDate = endDate;
+                        document.getElementById('reportStartDate').valueAsDate = startDate;
+                    }
+                    generateReports();
+                } else if (sectionName === 'settings') {
+                    loadSettings();
+                }
+            } else {
+                console.error('Section not found:', sectionName);
+            }
+        }
+
+        // Load all concerns for admin
+        async function loadAllAdminConcerns() {
+            const tableBody = document.getElementById('adminConcernsTableBody');
+            tableBody.innerHTML = `
+                <tr>
+                    <td colspan="8" class="text-center py-12">
+                        <div class="loading loading-spinner loading-lg text-primary"></div>
+                        <p class="mt-4 text-gray-600">Loading concerns...</p>
+                    </td>
+                </tr>
+            `;
+
+            try {
+                console.log('Fetching concerns from API...');
+                const token = localStorage.getItem('token');
+                const response = await fetch(`${API_BASE_URL}/concerns/`, {
+                    headers: {
+                        'Authorization': `Bearer ${token}`
+                    }
+                });
+                console.log('Response status:', response.status);
+                console.log('Response headers:', response.headers);
+
+                if (response.ok) {
+                    const concerns = await response.json();
+                    console.log('Concerns loaded:', concerns);
+
+                    // Update navigation badges
+                    updateNavigationBadges(concerns);
+
+                    if (concerns.length === 0) {
+                        tableBody.innerHTML = `
+                            <tr>
+                                <td colspan="8" class="text-center py-12">
+                                    <i class="fas fa-inbox text-4xl text-gray-300 mb-2"></i>
+                                    <p class="text-gray-600">No concerns found</p>
+                                </td>
+                            </tr>
+                        `;
+                    } else {
+                        renderAdminConcernsTable(concerns);
+                    }
+                } else {
+                    console.error('Response not OK:', response.status, response.statusText);
+                    const errorText = await response.text();
+                    console.error('Error details:', errorText);
+                    tableBody.innerHTML = `
+                        <tr>
+                            <td colspan="8" class="text-center py-8">
+                                <div class="alert alert-error inline-flex">
+                                    <i class="fas fa-exclamation-circle"></i>
+                                    <span>Failed to load concerns (${response.status})</span>
+                                </div>
+                            </td>
+                        </tr>
+                    `;
+                }
+            } catch (error) {
+                console.error('Fetch error:', error);
+                tableBody.innerHTML = `
+                    <tr>
+                        <td colspan="8" class="text-center py-8">
+                            <div class="alert alert-error inline-flex">
+                                <i class="fas fa-exclamation-circle"></i>
+                                <span>Error: ${error.message}</span>
+                            </div>
+                        </td>
+                    </tr>
+                `;
+            }
+        }
+
+        // Render admin concerns table
+        function renderAdminConcernsTable(concerns) {
+            const tableBody = document.getElementById('adminConcernsTableBody');
+
+            const statusColors = {
+                'pending': 'badge-warning',
+                'in_progress': 'badge-info',
+                'resolved': 'badge-success',
+                'closed': 'badge-neutral'
+            };
+
+            const priorityColors = {
+                'low': 'badge-neutral',
+                'normal': 'badge-info',
+                'high': 'badge-warning',
+                'urgent': 'badge-error'
+            };
+
+            tableBody.innerHTML = concerns.map(concern => `
+                <tr>
+                    <td>${concern.concern_id}</td>
+                    <td class="max-w-xs truncate">${concern.title}</td>
+                    <td>${concern.student_name || 'Anonymous'}</td>
+                    <td><span class="badge badge-sm badge-outline">${concern.category_name || 'N/A'}</span></td>
+                    <td><span class="badge ${statusColors[concern.status] || 'badge-neutral'} badge-sm">${concern.status}</span></td>
+                    <td><span class="badge ${priorityColors[concern.priority] || 'badge-neutral'} badge-sm">${concern.priority}</span></td>
+                    <td class="text-xs">${new Date(concern.created_at).toLocaleDateString()}</td>
+                    <td>
+                        <div class="flex gap-1">
+                            <button class="btn btn-ghost btn-xs" onclick="openConcernModal(${concern.concern_id})" title="View Details">
+                                <i class="fas fa-eye"></i>
+                            </button>
+                            <button class="btn btn-ghost btn-xs" onclick="openConcernModal(${concern.concern_id})" title="Edit">
+                                <i class="fas fa-edit"></i>
+                            </button>
+                        </div>
+                    </td>
+                </tr>
+            `).join('');
+        }
+
+        // Load pending concerns
+        async function loadPendingConcerns() {
+            const container = document.getElementById('pendingConcernsList');
+            container.innerHTML = `
+                <div class="text-center py-12">
+                    <div class="loading loading-spinner loading-lg text-primary"></div>
+                    <p class="text-white mt-4">Loading pending concerns...</p>
+                </div>
+            `;
+
+            try {
+                const token = localStorage.getItem('token');
+                const response = await fetch(`${API_BASE_URL}/concerns/`, {
+                    headers: {
+                        'Authorization': `Bearer ${token}`
+                    }
+                });
+
+                if (response.ok) {
+                    const allConcerns = await response.json();
+                    const pendingConcerns = allConcerns.filter(c => c.status === 'pending');
+
+                    if (pendingConcerns.length === 0) {
+                        container.innerHTML = `
+                            <div class="stat-card rounded-2xl p-12 shadow-lg text-center">
+                                <i class="fas fa-check-circle text-6xl text-green-300 mb-4"></i>
+                                <h3 class="text-xl font-bold text-gray-800 mb-2">All Caught Up!</h3>
+                                <p class="text-gray-600">No pending concerns at the moment.</p>
+                            </div>
+                        `;
+                    } else {
+                        renderPendingConcerns(pendingConcerns);
+                    }
+                }
+            } catch (error) {
+                container.innerHTML = `
+                    <div class="alert alert-error">
+                        <i class="fas fa-exclamation-circle"></i>
+                        <span>Error loading pending concerns</span>
+                    </div>
+                `;
+            }
+        }
+
+        // Render pending concerns
+        function renderPendingConcerns(concerns) {
+            const container = document.getElementById('pendingConcernsList');
+            container.innerHTML = concerns.map(concern => `
+                <div class="concern-card rounded-2xl p-6 shadow-lg">
+                    <div class="flex items-start justify-between gap-4 mb-4">
+                        <div class="flex-1">
+                            <div class="flex items-center gap-2 mb-2">
+                                <span class="badge badge-warning badge-sm">Pending</span>
+                                <span class="text-xs text-gray-500">${new Date(concern.created_at).toLocaleDateString()}</span>
+                            </div>
+                            <h3 class="text-lg font-bold text-gray-800 mb-2">${concern.title}</h3>
+                            <p class="text-sm text-gray-600 mb-3">${concern.description}</p>
+                            <div class="flex flex-wrap gap-2 text-xs text-gray-500">
+                                <span><i class="fas fa-tag mr-1"></i>${concern.category_name}</span>
+                                <span><i class="fas fa-user mr-1"></i>${concern.student_name || 'Anonymous'}</span>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="flex gap-2">
+                        <button class="btn btn-sm btn-success" onclick="assignConcern(${concern.concern_id})">
+                            <i class="fas fa-user-check mr-1"></i>Assign
+                        </button>
+                        <button class="btn btn-sm btn-info" onclick="changePriority(${concern.concern_id})">
+                            <i class="fas fa-exclamation mr-1"></i>Priority
+                        </button>
+                        <button class="btn btn-sm btn-primary" onclick="viewConcern(${concern.concern_id})">
+                            <i class="fas fa-eye mr-1"></i>View Details
+                        </button>
+                    </div>
+                </div>
+            `).join('');
+        }
+
+        // Load users
+        async function loadUsers() {
+            const tableBody = document.getElementById('usersTableBody');
+            tableBody.innerHTML = `
+                <tr>
+                    <td colspan="7" class="text-center py-12">
+                        <div class="loading loading-spinner loading-lg text-primary"></div>
+                        <p class="mt-4 text-gray-600">Loading users...</p>
+                    </td>
+                </tr>
+            `;
+
+            try {
+                const token = localStorage.getItem('token');
+                const response = await fetch(`${API_BASE_URL}/users/`, {
+                    headers: {
+                        'Authorization': `Bearer ${token}`
+                    }
+                });
+
+                if (response.ok) {
+                    const users = await response.json();
+                    renderUsersTable(users);
+                } else {
+                    tableBody.innerHTML = `
+                        <tr>
+                            <td colspan="7" class="text-center py-8">
+                                <div class="alert alert-error inline-flex">
+                                    <i class="fas fa-exclamation-circle"></i>
+                                    <span>Failed to load users</span>
+                                </div>
+                            </td>
+                        </tr>
+                    `;
+                }
+            } catch (error) {
+                tableBody.innerHTML = `
+                    <tr>
+                        <td colspan="7" class="text-center py-8">
+                            <div class="alert alert-error inline-flex">
+                                <i class="fas fa-exclamation-circle"></i>
+                                <span>Error: ${error.message}</span>
+                            </div>
+                        </td>
+                    </tr>
+                `;
+            }
+        }
+
+        // Render users table
+        function renderUsersTable(users) {
+            const tableBody = document.getElementById('usersTableBody');
+
+            tableBody.innerHTML = users.map(user => `
+                <tr>
+                    <td>${user.user_id}</td>
+                    <td>${user.first_name} ${user.last_name}</td>
+                    <td>${user.sr_code || user.email}</td>
+                    <td><span class="badge ${user.role === 'admin' ? 'badge-error' : 'badge-primary'} badge-sm">${user.role}</span></td>
+                    <td>${user.concern_count || 0}</td>
+                    <td><span class="badge badge-success badge-sm">Active</span></td>
+                    <td>
+                        <button class="btn btn-ghost btn-xs" onclick="editUser(${user.user_id})" title="Edit User">
+                            <i class="fas fa-edit"></i>
+                        </button>
+                        <button class="btn btn-ghost btn-xs text-error" onclick="confirmDeleteUser(${user.user_id}, '${user.first_name} ${user.last_name}')" title="Delete User">
+                            <i class="fas fa-trash"></i>
+                        </button>
+                    </td>
+                </tr>
+            `).join('');
+        }
+
+        // View concern - open modal
+        function viewConcern(id) {
+            openConcernModal(id);
+        }
+
+        function editConcern(id) {
+            openConcernModal(id);
+        }
+
+        function assignConcern(id) {
+            currentConcernId = id;
+            openConcernModal(id);
+            // Modal has assign functionality built-in
+        }
+
+        function changePriority(id) {
+            currentConcernId = id;
+            openConcernModal(id);
+            // Modal has priority change functionality built-in
+        }
+
+        async function editUser(userId) {
+            try {
+                const token = localStorage.getItem('token');
+                const response = await fetch(`${API_BASE_URL}/users/`, {
+                    headers: {
+                        'Authorization': `Bearer ${token}`
+                    }
+                });
+
+                if (response.ok) {
+                    const users = await response.json();
+                    const user = users.find(u => u.user_id === userId);
+                    
+                    if (user) {
+                        // Populate form
+                        document.getElementById('editUserId').value = user.user_id;
+                        document.getElementById('editUserFirstName').value = user.first_name || '';
+                        document.getElementById('editUserLastName').value = user.last_name || '';
+                        document.getElementById('editUserMiddleName').value = user.middle_name || '';
+                        document.getElementById('editUserEmail').value = user.email || '';
+                        document.getElementById('editUserSRCode').value = user.sr_code || '';
+                        document.getElementById('editUserProgram').value = user.program || '';
+                        document.getElementById('editUserYearLevel').value = user.year_level || '';
+                        document.getElementById('editUserRole').value = user.role || 'student';
+                        
+                        // Show modal
+                        document.getElementById('editUserModal').classList.remove('hidden');
+                    }
+                } else {
+                    alert('Failed to load user data');
+                }
+            } catch (error) {
+                console.error('Error loading user:', error);
+                alert('Error loading user data');
+            }
+        }
+
+        function closeEditUserModal() {
+            document.getElementById('editUserModal').classList.add('hidden');
+        }
+
+        function confirmDeleteUser(userId, userName) {
+            if (confirm(`Are you sure you want to delete user "${userName}"?\n\nThis action cannot be undone and will also delete all associated concerns.`)) {
+                deleteUser(userId);
+            }
+        }
+
+        async function deleteUser(userId) {
+            const token = localStorage.getItem('token');
+            
+            try {
+                const response = await fetch(`${API_BASE_URL}/users/${userId}`, {
+                    method: 'DELETE',
+                    headers: {
+                        'Authorization': `Bearer ${token}`
+                    }
+                });
+
+                const data = await response.json();
+
+                if (response.ok) {
+                    showNotification('User deleted successfully', 'success');
+                    loadUsers(); // Reload user list
+                } else {
+                    showNotification(data.error || 'Failed to delete user', 'error');
+                }
+            } catch (error) {
+                console.error('Error deleting user:', error);
+                showNotification('Failed to delete user', 'error');
+            }
+        }
+
+        async function submitEditUser(event) {
+            event.preventDefault();
+            
+            const userId = document.getElementById('editUserId').value;
+            const formData = {
+                first_name: document.getElementById('editUserFirstName').value,
+                last_name: document.getElementById('editUserLastName').value,
+                middle_name: document.getElementById('editUserMiddleName').value,
+                program: document.getElementById('editUserProgram').value,
+                year_level: document.getElementById('editUserYearLevel').value,
+                role: document.getElementById('editUserRole').value
+            };
+
+            try {
+                const token = localStorage.getItem('token');
+                const response = await fetch(`${API_BASE_URL}/users/${userId}`, {
+                    method: 'PUT',
+                    headers: {
+                        'Content-Type': 'application/json',
+                        'Authorization': `Bearer ${token}`
+                    },
+                    body: JSON.stringify(formData)
+                });
+
+                if (response.ok) {
+                    alert('User updated successfully!');
+                    closeEditUserModal();
+                    loadUsers(); // Reload user list
+                } else {
+                    const error = await response.json();
+                    alert('Failed to update user: ' + (error.error || 'Unknown error'));
+                }
+            } catch (error) {
+                console.error('Error updating user:', error);
+                alert('Error updating user');
+            }
+        }
+
+        // Apply filters to concerns
+        async function applyFilters() {
+            const status = document.getElementById('adminFilterStatus').value;
+            const category = document.getElementById('adminFilterCategory').value;
+            const search = document.getElementById('adminSearchConcerns').value.toLowerCase();
+            const token = localStorage.getItem('token');
+
+            try {
+                const response = await fetch(`${API_BASE_URL}/concerns/`, {
+                    headers: {
+                        'Authorization': `Bearer ${token}`
+                    }
+                });
+                if (response.ok) {
+                    let concerns = await response.json();
+
+                    // Apply filters
+                    if (status) {
+                        concerns = concerns.filter(c => c.status === status);
+                    }
+                    if (category) {
+                        concerns = concerns.filter(c => c.category_name === category);
+                    }
+                    if (search) {
+                        concerns = concerns.filter(c =>
+                            c.title.toLowerCase().includes(search) ||
+                            (c.description && c.description.toLowerCase().includes(search)) ||
+                            (c.student_name && c.student_name.toLowerCase().includes(search))
+                        );
+                    }
+
+                    renderAdminConcernsTable(concerns);
+                }
+            } catch (error) {
+                console.error('Filter error:', error);
+            }
+        }
+
+        // Filter users
+        function filterUsers() {
+            const search = document.getElementById('userSearch').value.toLowerCase();
+            const tableBody = document.getElementById('usersTableBody');
+            const rows = tableBody.getElementsByTagName('tr');
+
+            Array.from(rows).forEach(row => {
+                const text = row.textContent.toLowerCase();
+                row.style.display = text.includes(search) ? '' : 'none';
+            });
+        }
+
+        // Modal Functions
+        let currentConcernId = null;
+
+        function openConcernModal(concernId) {
+            currentConcernId = concernId;
+            document.getElementById('concernModal').classList.remove('hidden');
+            loadConcernDetails(concernId);
+        }
+
+        function closeConcernModal() {
+            currentConcernId = null;
+            document.getElementById('concernModal').classList.add('hidden');
+        }
+
+        async function loadConcernDetails(concernId) {
+            try {
+                // Show loading state
+                document.getElementById('modalTitle').textContent = 'Loading...';
+                const token = localStorage.getItem('token');
+
+                const response = await fetch(`${API_BASE_URL}/concerns/${concernId}`, {
+                    headers: {
+                        'Authorization': `Bearer ${token}`
+                    }
+                });
+                if (response.ok) {
+                    const concern = await response.json();
+                    displayConcernDetails(concern);
+
+                    // Load comments and history
+                    await loadConcernComments(concernId);
+                    await loadConcernHistory(concernId);
+                } else {
+                    console.error('Failed to load concern details');
+                    alert('Failed to load concern details');
+                    closeConcernModal();
+                }
+            } catch (error) {
+                console.error('Error loading concern:', error);
+                alert('Error loading concern details');
+                closeConcernModal();
+            }
+        }
+
+        function displayConcernDetails(concern) {
+            // Update modal header
+            document.getElementById('modalTicketNumber').textContent = concern.ticket_number;
+            document.getElementById('modalTitle').textContent = concern.title;
+
+            // Update details tab
+            document.getElementById('modalStudentName').textContent = concern.student_name || 'Anonymous';
+            document.getElementById('modalCategory').textContent = concern.category_name || 'N/A';
+            document.getElementById('modalOffice').textContent = concern.office_name || 'Not Assigned';
+            document.getElementById('modalDescription').textContent = concern.description || 'No description provided';
+            document.getElementById('modalCreatedAt').textContent = new Date(concern.created_at).toLocaleString();
+
+            // Update status badge
+            const statusBadge = document.getElementById('modalStatus');
+            statusBadge.className = 'badge badge-lg';
+            if (concern.status === 'pending') statusBadge.classList.add('badge-warning');
+            else if (concern.status === 'in-review') statusBadge.classList.add('badge-info');
+            else if (concern.status === 'in-progress') statusBadge.classList.add('badge-primary');
+            else if (concern.status === 'resolved') statusBadge.classList.add('badge-success');
+            else statusBadge.classList.add('badge-ghost');
+            statusBadge.textContent = concern.status.replace('-', ' ').toUpperCase();
+
+            // Update priority badge
+            const priorityBadge = document.getElementById('modalPriority');
+            priorityBadge.className = 'badge badge-lg';
+            if (concern.priority === 'urgent') priorityBadge.classList.add('badge-error');
+            else if (concern.priority === 'high') priorityBadge.classList.add('badge-warning');
+            else if (concern.priority === 'normal') priorityBadge.classList.add('badge-info');
+            else priorityBadge.classList.add('badge-ghost');
+            priorityBadge.textContent = concern.priority.toUpperCase();
+
+            // Set current values in update forms
+            document.getElementById('updateStatus').value = concern.status;
+            document.getElementById('updatePriority').value = concern.priority;
+            document.getElementById('assignOffice').value = concern.assigned_office_id || '';
+        }
+
+        async function updateConcernStatus() {
+            const newStatus = document.getElementById('updateStatus').value;
+            const token = localStorage.getItem('token');
+            
+            console.log('Updating status:', { concernId: currentConcernId, newStatus });
+            
+            if (!currentConcernId) {
+                alert('No concern selected');
+                return;
+            }
+            
+            if (!newStatus) {
+                alert('Please select a status');
+                return;
+            }
+            
+            try {
+                const url = `${API_BASE_URL}/concerns/${currentConcernId}/status`;
+                console.log('Calling:', url);
+                
+                const response = await fetch(url, {
+                    method: 'PATCH',
+                    headers: {
+                        'Content-Type': 'application/json',
+                        'Authorization': `Bearer ${token}`
+                    },
+                    body: JSON.stringify({ status: newStatus })
+                });
+
+                console.log('Response status:', response.status);
+                const responseData = await response.json();
+                console.log('Response data:', responseData);
+
+                if (response.ok) {
+                    alert('Status updated successfully!');
+                    loadConcernDetails(currentConcernId);
+                    loadDashboardData(); // Refresh dashboard
+                } else {
+                    alert('Failed to update status: ' + (responseData.error || 'Unknown error'));
+                }
+            } catch (error) {
+                console.error('Error updating status:', error);
+                alert('Error updating status: ' + error.message);
+            }
+        }
+
+        async function updateConcernPriority() {
+            const newPriority = document.getElementById('updatePriority').value;
+            const token = localStorage.getItem('token');
+            try {
+                const response = await fetch(`${API_BASE_URL}/concerns/${currentConcernId}/priority`, {
+                    method: 'PATCH',
+                    headers: {
+                        'Content-Type': 'application/json',
+                        'Authorization': `Bearer ${token}`
+                    },
+                    body: JSON.stringify({ priority: newPriority })
+                });
+
+                if (response.ok) {
+                    alert('Priority updated successfully!');
+                    loadConcernDetails(currentConcernId);
+                    loadDashboardData(); // Refresh dashboard
+                } else {
+                    alert('Failed to update priority');
+                }
+            } catch (error) {
+                console.error('Error updating priority:', error);
+                alert('Error updating priority');
+            }
+        }
+
+        async function assignConcernToOffice() {
+            const officeId = document.getElementById('assignOffice').value;
+            if (!officeId) {
+                alert('Please select an office');
+                return;
+            }
+            const token = localStorage.getItem('token');
+
+            try {
+                const response = await fetch(`${API_BASE_URL}/concerns/${currentConcernId}/assign`, {
+                    method: 'PATCH',
+                    headers: {
+                        'Content-Type': 'application/json',
+                        'Authorization': `Bearer ${token}`
+                    },
+                    body: JSON.stringify({ office_id: officeId })
+                });
+
+                if (response.ok) {
+                    alert('Concern assigned successfully!');
+                    loadConcernDetails(currentConcernId);
+                    loadDashboardData(); // Refresh dashboard
+                } else {
+                    alert('Failed to assign concern');
+                }
+            } catch (error) {
+                console.error('Error assigning concern:', error);
+                alert('Error assigning concern');
+            }
+        }
+
+        // Load offices for assignment dropdown
+        async function loadOffices() {
+            const token = localStorage.getItem('token');
+            try {
+                const response = await fetch(`${API_BASE_URL}/concerns/offices`, {
+                    headers: {
+                        'Authorization': `Bearer ${token}`
+                    }
+                });
+                if (response.ok) {
+                    const offices = await response.json();
+                    const select = document.getElementById('assignOffice');
+                    select.innerHTML = '<option value="">Select Office</option>';
+                    offices.forEach(office => {
+                        select.innerHTML += `<option value="${office.office_id}">${office.office_name}</option>`;
+                    });
+                } else {
+                    console.error('Failed to load offices:', response.status);
+                }
+            } catch (error) {
+                console.error('Error loading offices:', error);
+            }
+        }
+
+        // Load concern comments
+        async function loadConcernComments(concernId) {
+            try {
+                const token = localStorage.getItem('token');
+                const response = await fetch(`${API_BASE_URL}/concerns/${concernId}/comments`, {
+                    headers: {
+                        'Authorization': `Bearer ${token}`
+                    }
+                });
+                if (response.ok) {
+                    const data = await response.json();
+                    displayComments(data.comments || []);
+                } else {
+                    console.error('Failed to load comments');
+                }
+            } catch (error) {
+                console.error('Error loading comments:', error);
+            }
+        }
+
+        // Load concern history
+        async function loadConcernHistory(concernId) {
+            try {
+                const token = localStorage.getItem('token');
+                const response = await fetch(`${API_BASE_URL}/concerns/${concernId}/history`, {
+                    headers: {
+                        'Authorization': `Bearer ${token}`
+                    }
+                });
+                if (response.ok) {
+                    const data = await response.json();
+                    displayHistory(data.history || []);
+                } else {
+                    console.error('Failed to load history');
+                }
+            } catch (error) {
+                console.error('Error loading history:', error);
+            }
+        }
+
+        // Display comments in modal
+        function displayComments(comments) {
+            const container = document.getElementById('commentsContainer');
+            if (!container) return;
+
+            if (comments.length === 0) {
+                container.innerHTML = '<p class="text-gray-500 text-center py-8">No comments yet</p>';
+                return;
+            }
+
+            container.innerHTML = comments.map(comment => `
+                <div class="bg-gray-50 rounded-lg p-4 mb-3">
+                    <div class="flex justify-between items-start mb-2">
+                        <div class="flex items-center gap-2">
+                            <div class="avatar placeholder">
+                                <div class="bg-primary text-white rounded-full w-8 h-8 text-xs">
+                                    <span>${comment.user_name ? comment.user_name.split(' ').map(n => n[0]).join('') : 'U'}</span>
+                                </div>
+                            </div>
+                            <div>
+                                <p class="font-semibold text-sm">${comment.user_name || 'Unknown'}</p>
+                                <p class="text-xs text-gray-500">${new Date(comment.created_at).toLocaleString()}</p>
+                            </div>
+                        </div>
+                        ${comment.is_internal ? '<span class="badge badge-sm badge-warning">Internal</span>' : ''}
+                    </div>
+                    <p class="text-sm text-gray-700">${comment.comment_text}</p>
+                </div>
+            `).join('');
+        }
+
+        // Display history in modal
+        function displayHistory(history) {
+            const container = document.getElementById('historyContainer');
+            if (!container) return;
+
+            if (history.length === 0) {
+                container.innerHTML = '<p class="text-gray-500 text-center py-8">No history available</p>';
+                return;
+            }
+
+            container.innerHTML = `
+                <div class="space-y-4">
+                    ${history.map((entry, index) => `
+                        <div class="flex gap-4">
+                            <div class="flex flex-col items-center">
+                                <div class="w-3 h-3 rounded-full ${index === 0 ? 'bg-primary' : 'bg-gray-300'}"></div>
+                                ${index < history.length - 1 ? '<div class="w-0.5 h-full bg-gray-200 flex-1 min-h-[40px]"></div>' : ''}
+                            </div>
+                            <div class="flex-1 pb-4">
+                                <div class="bg-gray-50 rounded-lg p-4">
+                                    <div class="flex justify-between items-start mb-2">
+                                        <p class="font-semibold text-sm">Status: ${entry.new_status.replace('-', ' ').toUpperCase()}</p>
+                                        <span class="text-xs text-gray-500">${new Date(entry.changed_at).toLocaleString()}</span>
+                                    </div>
+                                    ${entry.remarks ? `<p class="text-sm text-gray-600 mt-1">${entry.remarks}</p>` : ''}
+                                    <p class="text-xs text-gray-400 mt-2">By: ${entry.changed_by || 'System'}</p>
+                                </div>
+                            </div>
+                        </div>
+                    `).join('')}
+                </div>
+            `;
+        }
+
+        // Add comment function
+        async function submitComment() {
+            const commentText = document.getElementById('commentText').value.trim();
+            if (!commentText) {
+                alert('Please enter a comment');
+                return;
+            }
+            const token = localStorage.getItem('token');
+
+            try {
+                const response = await fetch(`${API_BASE_URL}/concerns/${currentConcernId}/comments`, {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                        'Authorization': `Bearer ${token}`
+                    },
+                    body: JSON.stringify({ comment_text: commentText })
+                });
+
+                if (response.ok) {
+                    alert('Comment added successfully!');
+                    document.getElementById('commentText').value = '';
+                    await loadConcernComments(currentConcernId);
+                } else {
+                    alert('Failed to add comment');
+                }
+            } catch (error) {
+                console.error('Error adding comment:', error);
+                alert('Error adding comment');
+            }
+        }
+
+        // Modal tab switching
+        function switchModalTab(tabName) {
+            // Hide all tabs
+            document.querySelectorAll('.modal-tab-content').forEach(tab => {
+                tab.classList.add('hidden');
+            });
+
+            // Remove active class from all tab buttons
+            document.querySelectorAll('.modal-tab-btn').forEach(btn => {
+                btn.classList.remove('tab-active');
+            });
+
+            // Show selected tab
+            document.getElementById(`${tabName}Tab`).classList.remove('hidden');
+            event.target.classList.add('tab-active');
+        }
+        
+        // ===== CATEGORY MANAGEMENT =====
+        
+        // Load categories
+        async function loadCategories() {
+            const grid = document.getElementById('categoriesGrid');
+            
+            try {
+                const response = await fetch(`${API_BASE_URL}/concerns/categories`, {headers:{'Authorization':`Bearer ${localStorage.getItem('token')}`}});
+                const data = await response.json();
+                
+                if (data.categories && data.categories.length > 0) {
+                    grid.innerHTML = data.categories.map(cat => `
+                        <div class="stat-card rounded-2xl p-6 shadow-lg hover:shadow-xl transition-all">
+                            <div class="flex justify-between items-start mb-4">
+                                <div class="bg-primary/10 p-3 rounded-xl">
+                                    <i class="fas fa-tag text-primary text-2xl"></i>
+                                </div>
+                                <div class="flex gap-2">
+                                    <button onclick="editCategory(${cat.category_id})" class="btn btn-sm btn-circle btn-ghost hover:bg-blue-100">
+                                        <i class="fas fa-edit text-blue-600"></i>
+                                    </button>
+                                    <button onclick="deleteCategory(${cat.category_id}, '${cat.category_name}')" class="btn btn-sm btn-circle btn-ghost hover:bg-red-100">
+                                        <i class="fas fa-trash text-red-600"></i>
+                                    </button>
+                                </div>
+                            </div>
+                            <h3 class="font-bold text-xl text-gray-800 mb-2">${cat.category_name}</h3>
+                            <p class="text-gray-600 text-sm">${cat.description || 'No description'}</p>
+                            <div class="mt-4 pt-4 border-t border-gray-200">
+                                <span class="text-xs text-gray-500">
+                                    <i class="fas fa-calendar mr-1"></i>
+                                    Created ${new Date(cat.created_at).toLocaleDateString()}
+                                </span>
+                            </div>
+                        </div>
+                    `).join('');
+                } else {
+                    grid.innerHTML = `
+                        <div class="col-span-full text-center py-12">
+                            <i class="fas fa-tags text-6xl text-gray-300 mb-4"></i>
+                            <p class="text-white text-lg">No categories yet</p>
+                            <p class="text-white/60 text-sm">Click "Add Category" to create one</p>
+                        </div>
+                    `;
+                }
+            } catch (error) {
+                console.error('Error loading categories:', error);
+                grid.innerHTML = `
+                    <div class="col-span-full">
+                        <div class="alert alert-error">
+                            <i class="fas fa-exclamation-circle"></i>
+                            <span>Failed to load categories</span>
+                        </div>
+                    </div>
+                `;
+            }
+        }
+        
+        // Open add category modal
+        function openAddCategoryModal() {
+            document.getElementById('categoryModalTitle').textContent = 'Add Category';
+            document.getElementById('categoryId').value = '';
+            document.getElementById('categoryName').value = '';
+            document.getElementById('categoryDescription').value = '';
+            document.getElementById('categoryModal').classList.remove('hidden');
+        }
+        
+        // Close category modal
+        function closeCategoryModal() {
+            document.getElementById('categoryModal').classList.add('hidden');
+            document.getElementById('categoryForm').reset();
+        }
+        
+        // Edit category
+        async function editCategory(categoryId) {
+            try {
+                const response = await fetch(`${API_BASE_URL}/concerns/categories`, {headers:{'Authorization':`Bearer ${localStorage.getItem('token')}`}});
+                const data = await response.json();
+                const category = data.categories.find(c => c.category_id === categoryId);
+                
+                if (category) {
+                    document.getElementById('categoryModalTitle').textContent = 'Edit Category';
+                    document.getElementById('categoryId').value = category.category_id;
+                    document.getElementById('categoryName').value = category.category_name;
+                    document.getElementById('categoryDescription').value = category.description || '';
+                    document.getElementById('categoryModal').classList.remove('hidden');
+                }
+            } catch (error) {
+                console.error('Error loading category:', error);
+                alert('Failed to load category details');
+            }
+        }
+        
+        // Delete category
+        async function deleteCategory(categoryId, categoryName) {
+            if (!confirm(`Are you sure you want to delete "${categoryName}"?`)) {
+                return;
+            }
+            const token = localStorage.getItem('token');
+            
+            try {
+                const response = await fetch(`${API_BASE_URL}/concerns/categories/${categoryId}`, {
+                    method: 'DELETE',
+                    headers: {
+                        'Authorization': `Bearer ${token}`
+                    }
+                });
+                
+                if (response.ok) {
+                    showCategoryAlert('Category deleted successfully!', 'success');
+                    await loadCategories();
+                } else {
+                    const data = await response.json();
+                    showCategoryAlert(data.error || 'Failed to delete category', 'error');
+                }
+            } catch (error) {
+                console.error('Error deleting category:', error);
+                showCategoryAlert('Failed to delete category', 'error');
+            }
+        }
+        
+        // Show category alert
+        function showCategoryAlert(message, type) {
+            const container = document.getElementById('categoryAlertContainer');
+            const alertClass = type === 'success' ? 'alert-success' : 'alert-error';
+            const icon = type === 'success' ? 'fa-check-circle' : 'fa-exclamation-circle';
+            
+            container.innerHTML = `
+                <div class="alert ${alertClass}">
+                    <i class="fas ${icon}"></i>
+                    <span>${message}</span>
+                </div>
+            `;
+            
+            setTimeout(() => {
+                container.innerHTML = '';
+            }, 5000);
+        }
+
+        // ============= REPORTS & ANALYTICS =============
+        async function generateReports() {
+            const startDate = document.getElementById('reportStartDate').value;
+            const endDate = document.getElementById('reportEndDate').value;
+            const token = localStorage.getItem('token');
+            const button = document.querySelector('.btn-primary[onclick="generateReports()"]');
+
+            console.log('Generating reports with date range:', startDate, 'to', endDate);
+            
+            // Show loading state
+            const originalText = button ? button.innerHTML : '';
+            if (button) {
+                button.innerHTML = '<i class="fas fa-spinner fa-spin mr-2"></i>Generating...';
+                button.disabled = true;
+            }
+
+            try {
+                const response = await fetch(`${API_BASE_URL}/concerns/`, {
+                    headers: { 'Authorization': `Bearer ${token}` }
+                });
+
+                if (response.ok) {
+                    let concerns = await response.json();
+                    console.log('Total concerns fetched:', concerns.length);
+                    console.log('First concern:', concerns[0]);
+
+                    // Filter by date range if provided
+                    if (startDate) {
+                        const startDateTime = new Date(startDate);
+                        startDateTime.setHours(0, 0, 0, 0);
+                        concerns = concerns.filter(c => new Date(c.created_at) >= startDateTime);
+                        console.log('After start date filter:', concerns.length);
+                    }
+                    if (endDate) {
+                        const endDateTime = new Date(endDate);
+                        endDateTime.setHours(23, 59, 59, 999);
+                        concerns = concerns.filter(c => new Date(c.created_at) <= endDateTime);
+                        console.log('After end date filter:', concerns.length);
+                    }
+
+                    displayReportStatistics(concerns);
+                    displayStatusChart(concerns);
+                    displayCategoryChart(concerns);
+                    displayPriorityChart(concerns);
+                    displayMonthlyChart(concerns);
+                    
+                    console.log('Reports generated successfully');
+                    
+                    // Show success message
+                    if (button) {
+                        button.innerHTML = '<i class="fas fa-check mr-2"></i>Report Generated!';
+                        setTimeout(() => {
+                            button.innerHTML = originalText;
+                            button.disabled = false;
+                        }, 2000);
+                    }
+                } else {
+                    throw new Error('Failed to fetch concerns');
+                }
+            } catch (error) {
+                console.error('Error generating reports:', error);
+                alert('Failed to generate reports. Please try again.');
+                if (button) {
+                    button.innerHTML = originalText;
+                    button.disabled = false;
+                }
+            }
+        }
+
+        function displayReportStatistics(concerns) {
+            console.log('=== Display Report Statistics ===');
+            console.log('Total concerns received:', concerns.length);
+            
+            const total = concerns.length;
+            const resolved = concerns.filter(c => c.status === 'resolved').length;
+            const resolvedRate = total > 0 ? ((resolved / total) * 100).toFixed(1) : 0;
+            
+            console.log(`Resolved: ${resolved} of ${total} = ${resolvedRate}%`);
+
+            // Calculate average resolution time
+            const resolvedConcerns = concerns.filter(c => c.status === 'resolved' && c.updated_at);
+            let avgTime = 0;
+            if (resolvedConcerns.length > 0) {
+                const totalTime = resolvedConcerns.reduce((sum, c) => {
+                    const created = new Date(c.created_at);
+                    const updated = new Date(c.updated_at);
+                    return sum + (updated - created);
+                }, 0);
+                avgTime = Math.round(totalTime / resolvedConcerns.length / (1000 * 60 * 60 * 24));
+            }
+            
+            console.log(`Avg resolution time: ${avgTime}d (from ${resolvedConcerns.length} resolved concerns)`);
+
+            // Get unique students
+            const activeUsers = new Set(concerns.map(c => c.student_id)).size;
+            console.log(`Active users: ${activeUsers}`);
+
+            // Update DOM elements
+            const totalEl = document.getElementById('reportTotalConcerns');
+            const rateEl = document.getElementById('reportResolvedRate');
+            const avgEl = document.getElementById('reportAvgTime');
+            const usersEl = document.getElementById('reportActiveUsers');
+            
+            console.log('Updating DOM elements...');
+            if (totalEl) totalEl.textContent = total;
+            if (rateEl) rateEl.textContent = `${resolvedRate}%`;
+            if (avgEl) avgEl.textContent = `${avgTime}d`;
+            if (usersEl) usersEl.textContent = activeUsers;
+            
+            console.log('Statistics updated:', { total, resolvedRate, avgTime, activeUsers });
+        }
+
+        function displayStatusChart(concerns) {
+            const statusCounts = {};
+            concerns.forEach(c => {
+                statusCounts[c.status] = (statusCounts[c.status] || 0) + 1;
+            });
+
+            const total = concerns.length;
+            const chartHtml = Object.entries(statusCounts)
+                .sort((a, b) => b[1] - a[1])
+                .map(([status, count]) => {
+                    const percentage = ((count / total) * 100).toFixed(1);
+                    const colorClass = {
+                        'pending': 'bg-yellow-500',
+                        'in-review': 'bg-blue-500',
+                        'in-progress': 'bg-purple-500',
+                        'resolved': 'bg-green-500',
+                        'closed': 'bg-gray-500'
+                    }[status] || 'bg-gray-400';
+
+                    return `
+                        <div>
+                            <div class="flex justify-between text-sm mb-1">
+                                <span class="font-medium capitalize">${status.replace('-', ' ')}</span>
+                                <span class="text-gray-600">${count} (${percentage}%)</span>
+                            </div>
+                            <div class="w-full bg-gray-200 rounded-full h-2">
+                                <div class="${colorClass} h-2 rounded-full" style="width: ${percentage}%"></div>
+                            </div>
+                        </div>
+                    `;
+                }).join('');
+
+            document.getElementById('statusChart').innerHTML = chartHtml || '<p class="text-gray-500 text-center">No data available</p>';
+        }
+
+        function displayCategoryChart(concerns) {
+            const categoryCounts = {};
+            concerns.forEach(c => {
+                const cat = c.category_name || 'Uncategorized';
+                categoryCounts[cat] = (categoryCounts[cat] || 0) + 1;
+            });
+
+            const total = concerns.length;
+            const chartHtml = Object.entries(categoryCounts)
+                .sort((a, b) => b[1] - a[1])
+                .slice(0, 5)
+                .map(([category, count]) => {
+                    const percentage = ((count / total) * 100).toFixed(1);
+                    return `
+                        <div>
+                            <div class="flex justify-between text-sm mb-1">
+                                <span class="font-medium">${category}</span>
+                                <span class="text-gray-600">${count} (${percentage}%)</span>
+                            </div>
+                            <div class="w-full bg-gray-200 rounded-full h-2">
+                                <div class="bg-blue-500 h-2 rounded-full" style="width: ${percentage}%"></div>
+                            </div>
+                        </div>
+                    `;
+                }).join('');
+
+            document.getElementById('categoryChart').innerHTML = chartHtml || '<p class="text-gray-500 text-center">No data available</p>';
+        }
+
+        function displayPriorityChart(concerns) {
+            const priorityCounts = { 'urgent': 0, 'high': 0, 'normal': 0, 'low': 0 };
+            concerns.forEach(c => {
+                if (priorityCounts.hasOwnProperty(c.priority)) {
+                    priorityCounts[c.priority]++;
+                }
+            });
+
+            const total = concerns.length;
+            const chartHtml = Object.entries(priorityCounts)
+                .filter(([_, count]) => count > 0)
+                .map(([priority, count]) => {
+                    const percentage = ((count / total) * 100).toFixed(1);
+                    const colorClass = {
+                        'urgent': 'bg-red-500',
+                        'high': 'bg-orange-500',
+                        'normal': 'bg-blue-500',
+                        'low': 'bg-green-500'
+                    }[priority];
+
+                    return `
+                        <div>
+                            <div class="flex justify-between text-sm mb-1">
+                                <span class="font-medium capitalize">${priority}</span>
+                                <span class="text-gray-600">${count} (${percentage}%)</span>
+                            </div>
+                            <div class="w-full bg-gray-200 rounded-full h-2">
+                                <div class="${colorClass} h-2 rounded-full" style="width: ${percentage}%"></div>
+                            </div>
+                        </div>
+                    `;
+                }).join('');
+
+            document.getElementById('priorityChart').innerHTML = chartHtml || '<p class="text-gray-500 text-center">No data available</p>';
+        }
+
+        function displayMonthlyChart(concerns) {
+            const monthlyCounts = {};
+            concerns.forEach(c => {
+                const date = new Date(c.created_at);
+                const monthKey = `${date.getFullYear()}-${String(date.getMonth() + 1).padStart(2, '0')}`;
+                monthlyCounts[monthKey] = (monthlyCounts[monthKey] || 0) + 1;
+            });
+
+            const sortedMonths = Object.entries(monthlyCounts)
+                .sort((a, b) => a[0].localeCompare(b[0]))
+                .slice(-6);
+
+            const maxCount = Math.max(...sortedMonths.map(([_, count]) => count), 1);
+            const chartHtml = sortedMonths.map(([month, count]) => {
+                const percentage = ((count / maxCount) * 100).toFixed(1);
+                const [year, monthNum] = month.split('-');
+                const monthName = new Date(year, monthNum - 1).toLocaleDateString('en-US', { month: 'short', year: 'numeric' });
+
+                return `
+                    <div class="flex items-center gap-2">
+                        <span class="text-sm font-medium w-20">${monthName}</span>
+                        <div class="flex-1 bg-gray-200 rounded-full h-6 relative">
+                            <div class="bg-gradient-to-r from-blue-500 to-purple-500 h-6 rounded-full flex items-center justify-end px-2" style="width: ${percentage}%">
+                                <span class="text-xs font-bold text-white">${count}</span>
+                            </div>
+                        </div>
+                    </div>
+                `;
+            }).join('');
+
+            document.getElementById('monthlyChart').innerHTML = chartHtml || '<p class="text-gray-500 text-center">No data available</p>';
+        }
+
+        function exportReportCSV() {
+            alert('CSV export functionality - Generates a downloadable CSV file with report data');
+        }
+
+        function exportReportPDF() {
+            alert('PDF export functionality - Generates a formatted PDF report');
+        }
+
+        function printReport() {
+            window.print();
+        }
+
+        // ============= SETTINGS =============
+        function loadSettings() {
+            const user = JSON.parse(localStorage.getItem('user'));
+            if (user) {
+                document.getElementById('settingsFirstName').value = user.first_name || '';
+                document.getElementById('settingsLastName').value = user.last_name || '';
+                document.getElementById('settingsEmail').value = user.email || '';
+                document.getElementById('settingsSrCode').value = user.sr_code || '';
+            }
+        }
+
+        async function updateProfile() {
+            const firstName = document.getElementById('settingsFirstName').value.trim();
+            const lastName = document.getElementById('settingsLastName').value.trim();
+
+            if (!firstName || !lastName) {
+                alert('Please fill in all required fields');
+                return;
+            }
+
+            const token = localStorage.getItem('token');
+            try {
+                const response = await fetch(`${API_BASE_URL}/users/profile`, {
+                    method: 'PUT',
+                    headers: {
+                        'Content-Type': 'application/json',
+                        'Authorization': `Bearer ${token}`
+                    },
+                    body: JSON.stringify({ first_name: firstName, last_name: lastName })
+                });
+
+                if (response.ok) {
+                    const data = await response.json();
+                    localStorage.setItem('user', JSON.stringify(data.user));
+                    alert('Profile updated successfully!');
+                    
+                    // Update admin name in sidebar
+                    document.getElementById('adminName').textContent = `${firstName} ${lastName}`;
+                    document.getElementById('adminInitials').textContent = `${firstName[0]}${lastName[0]}`.toUpperCase();
+                } else {
+                    const errorData = await response.json();
+                    alert(errorData.error || 'Failed to update profile');
+                }
+            } catch (error) {
+                console.error('Error updating profile:', error);
+                alert('Error updating profile');
+            }
+        }
+
+        async function changePassword() {
+            const currentPassword = document.getElementById('currentPassword').value;
+            const newPassword = document.getElementById('newPassword').value;
+            const confirmPassword = document.getElementById('confirmPassword').value;
+
+            if (!currentPassword || !newPassword || !confirmPassword) {
+                alert('Please fill in all password fields');
+                return;
+            }
+
+            if (newPassword !== confirmPassword) {
+                alert('New passwords do not match');
+                return;
+            }
+
+            if (newPassword.length < 6) {
+                alert('Password must be at least 6 characters long');
+                return;
+            }
+
+            const token = localStorage.getItem('token');
+            try {
+                const response = await fetch(`${API_BASE_URL}/users/change-password`, {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                        'Authorization': `Bearer ${token}`
+                    },
+                    body: JSON.stringify({ 
+                        current_password: currentPassword,
+                        new_password: newPassword 
+                    })
+                });
+
+                if (response.ok) {
+                    alert('Password changed successfully!');
+                    document.getElementById('currentPassword').value = '';
+                    document.getElementById('newPassword').value = '';
+                    document.getElementById('confirmPassword').value = '';
+                } else {
+                    const data = await response.json();
+                    alert(data.error || 'Failed to change password');
+                }
+            } catch (error) {
+                console.error('Error changing password:', error);
+                alert('Error changing password');
+            }
+        }
+
+        function saveNotificationSettings() {
+            const settings = {
+                notifyNewConcern: document.getElementById('notifyNewConcern').checked,
+                notifyStatusChange: document.getElementById('notifyStatusChange').checked,
+                notifyNewComment: document.getElementById('notifyNewComment').checked,
+                notifyDailySummary: document.getElementById('notifyDailySummary').checked
+            };
+
+            localStorage.setItem('notificationSettings', JSON.stringify(settings));
+            alert('Notification settings saved successfully!');
+        }
+
+        function saveSystemPreferences() {
+            const preferences = {
+                itemsPerPage: document.getElementById('itemsPerPage').value,
+                defaultView: document.getElementById('defaultView').value
+            };
+
+            localStorage.setItem('systemPreferences', JSON.stringify(preferences));
+            alert('System preferences saved successfully!');
+        }
+
+        // Load settings when settings section is shown
+        document.addEventListener('DOMContentLoaded', () => {
+            // Load notification settings
+            const notifSettings = JSON.parse(localStorage.getItem('notificationSettings') || '{}');
+            if (notifSettings.notifyNewConcern !== undefined) {
+                document.getElementById('notifyNewConcern').checked = notifSettings.notifyNewConcern;
+            }
+            if (notifSettings.notifyStatusChange !== undefined) {
+                document.getElementById('notifyStatusChange').checked = notifSettings.notifyStatusChange;
+            }
+            if (notifSettings.notifyNewComment !== undefined) {
+                document.getElementById('notifyNewComment').checked = notifSettings.notifyNewComment;
+            }
+            if (notifSettings.notifyDailySummary !== undefined) {
+                document.getElementById('notifyDailySummary').checked = notifSettings.notifyDailySummary;
+            }
+
+            // Load system preferences
+            const sysPrefs = JSON.parse(localStorage.getItem('systemPreferences') || '{}');
+            if (sysPrefs.itemsPerPage) {
+                document.getElementById('itemsPerPage').value = sysPrefs.itemsPerPage;
+            }
+            if (sysPrefs.defaultView) {
+                document.getElementById('defaultView').value = sysPrefs.defaultView;
+            }
+
+            // Set default date range (last 30 days)
+            const endDate = new Date();
+            const startDate = new Date();
+            startDate.setDate(startDate.getDate() - 30);
+            
+            document.getElementById('reportEndDate').valueAsDate = endDate;
+            document.getElementById('reportStartDate').valueAsDate = startDate;
+            
+            // Generate reports if on reports section
+            const currentSection = document.querySelector('.content-section:not(.hidden)');
+            if (currentSection && currentSection.id === 'reports-section') {
+                generateReports();
+            }
+        });
+    </script>
+
+    <!-- Concern Detail Modal -->
+    <div id="concernModal" class="hidden fixed inset-0 bg-black/50 backdrop-blur-sm z-50 flex items-center justify-center p-4">
+        <div class="bg-white rounded-2xl shadow-2xl max-w-4xl w-full max-h-[90vh] overflow-hidden">
+            <!-- Modal Header -->
+            <div class="bg-gradient-to-r from-blue-600 to-purple-600 p-6 text-white">
+                <div class="flex justify-between items-start mb-4">
+                    <div>
+                        <p class="text-sm opacity-90">Ticket #<span id="modalTicketNumber">000000</span></p>
+                        <h2 id="modalTitle" class="text-2xl font-bold mt-1">Concern Title</h2>
+                    </div>
+                    <button onclick="closeConcernModal()" class="btn btn-sm btn-circle btn-ghost text-white hover:bg-white/20">
+                        <i class="fas fa-times"></i>
+                    </button>
+                </div>
+                <div class="flex gap-3">
+                    <span id="modalStatus" class="badge badge-lg">PENDING</span>
+                    <span id="modalPriority" class="badge badge-lg">NORMAL</span>
+                </div>
+            </div>
+
+            <!-- Modal Tabs -->
+            <div class="border-b border-gray-200">
+                <div class="tabs tabs-boxed bg-transparent p-2">
+                    <button class="modal-tab-btn tab tab-active" onclick="switchModalTab('details')">
+                        <i class="fas fa-info-circle mr-2"></i>Details
+                    </button>
+                    <button class="modal-tab-btn tab" onclick="switchModalTab('actions')">
+                        <i class="fas fa-tasks mr-2"></i>Actions
+                    </button>
+                    <button class="modal-tab-btn tab" onclick="switchModalTab('history')">
+                        <i class="fas fa-history mr-2"></i>History
+                    </button>
+                </div>
+            </div>
+
+            <!-- Modal Content -->
+            <div class="p-6 overflow-y-auto max-h-[calc(90vh-250px)]">
+                <!-- Details Tab -->
+                <div id="detailsTab" class="modal-tab-content">
+                    <div class="grid grid-cols-1 md:grid-cols-2 gap-6 mb-6">
+                        <div>
+                            <label class="text-sm font-semibold text-gray-600">Student</label>
+                            <p id="modalStudentName" class="text-lg">Loading...</p>
+                        </div>
+                        <div>
+                            <label class="text-sm font-semibold text-gray-600">Category</label>
+                            <p id="modalCategory" class="text-lg">Loading...</p>
+                        </div>
+                        <div>
+                            <label class="text-sm font-semibold text-gray-600">Assigned Office</label>
+                            <p id="modalOffice" class="text-lg">Loading...</p>
+                        </div>
+                        <div>
+                            <label class="text-sm font-semibold text-gray-600">Submitted</label>
+                            <p id="modalCreatedAt" class="text-lg">Loading...</p>
+                        </div>
+                    </div>
+
+                    <div class="mb-6">
+                        <label class="text-sm font-semibold text-gray-600">Description</label>
+                        <div class="bg-gray-50 rounded-lg p-4 mt-2">
+                            <p id="modalDescription" class="text-gray-700 whitespace-pre-wrap">Loading...</p>
+                        </div>
+                    </div>
+
+                    <div>
+                        <label class="text-sm font-semibold text-gray-600 mb-2 block">Attachments</label>
+                        <div class="bg-gray-50 rounded-lg p-4">
+                            <p class="text-gray-500 text-sm">No attachments</p>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Actions Tab -->
+                <div id="actionsTab" class="modal-tab-content hidden">
+                    <div class="space-y-6">
+                        <!-- Update Status -->
+                        <div class="stat-card rounded-xl p-4">
+                            <label class="text-sm font-semibold text-gray-700 mb-2 block">Update Status</label>
+                            <div class="flex gap-3">
+                                <select id="updateStatus" class="select select-bordered flex-1">
+                                    <option value="pending">Pending</option>
+                                    <option value="in-review">In Review</option>
+                                    <option value="in-progress">In Progress</option>
+                                    <option value="resolved">Resolved</option>
+                                    <option value="closed">Closed</option>
+                                </select>
+                                <button onclick="updateConcernStatus()" class="btn btn-primary">
+                                    <i class="fas fa-check mr-2"></i>Update
+                                </button>
+                            </div>
+                        </div>
+
+                        <!-- Update Priority -->
+                        <div class="stat-card rounded-xl p-4">
+                            <label class="text-sm font-semibold text-gray-700 mb-2 block">Update Priority</label>
+                            <div class="flex gap-3">
+                                <select id="updatePriority" class="select select-bordered flex-1">
+                                    <option value="low">Low</option>
+                                    <option value="normal">Normal</option>
+                                    <option value="high">High</option>
+                                    <option value="urgent">Urgent</option>
+                                </select>
+                                <button onclick="updateConcernPriority()" class="btn btn-warning">
+                                    <i class="fas fa-exclamation-triangle mr-2"></i>Update
+                                </button>
+                            </div>
+                        </div>
+
+                        <!-- Assign Office -->
+                        <div class="stat-card rounded-xl p-4">
+                            <label class="text-sm font-semibold text-gray-700 mb-2 block">Assign to Office</label>
+                            <div class="flex gap-3">
+                                <select id="assignOffice" class="select select-bordered flex-1">
+                                    <option value="">Select Office</option>
+                                </select>
+                                <button onclick="assignConcernToOffice()" class="btn btn-info">
+                                    <i class="fas fa-building mr-2"></i>Assign
+                                </button>
+                            </div>
+                        </div>
+
+                        <!-- Add Comment -->
+                        <div class="stat-card rounded-xl p-4">
+                            <label class="text-sm font-semibold text-gray-700 mb-2 block">Add Comment</label>
+                            <textarea id="commentText" class="textarea textarea-bordered w-full mb-3" rows="3" placeholder="Add a comment or update..."></textarea>
+                            <button class="btn btn-success w-full" onclick="submitComment()">
+                                <i class="fas fa-comment mr-2"></i>Add Comment
+                            </button>
+                        </div>
+                        
+                        <!-- Comments List -->
+                        <div class="stat-card rounded-xl p-4">
+                            <label class="text-sm font-semibold text-gray-700 mb-2 block">Comments</label>
+                            <div id="commentsContainer" class="space-y-3">
+                                <p class="text-gray-500 text-center py-4">Loading comments...</p>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- History Tab -->
+                <div id="historyTab" class="modal-tab-content hidden">
+                    <div id="historyContainer" class="space-y-4">
+                        <p class="text-gray-500 text-center py-8">Loading history...</p>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+    
+    <!-- Category Modal -->
+    <div id="categoryModal" class="hidden fixed inset-0 bg-black/50 backdrop-blur-sm z-50 flex items-center justify-center p-4">
+        <div class="bg-white rounded-2xl shadow-2xl max-w-md w-full">
+            <div class="bg-gradient-to-r from-blue-600 to-purple-600 p-6 text-white rounded-t-2xl">
+                <div class="flex justify-between items-center">
+                    <h2 id="categoryModalTitle" class="text-2xl font-bold">Add Category</h2>
+                    <button onclick="closeCategoryModal()" class="btn btn-sm btn-circle btn-ghost text-white hover:bg-white/20">
+                        <i class="fas fa-times"></i>
+                    </button>
+                </div>
+            </div>
+            
+            <form id="categoryForm" class="p-6 space-y-4">
+                <input type="hidden" id="categoryId" value="">
+                
+                <div class="form-control">
+                    <label class="label">
+                        <span class="label-text font-semibold">
+                            <i class="fas fa-tag mr-2 text-primary"></i>Category Name
+                        </span>
+                    </label>
+                    <input 
+                        type="text" 
+                        id="categoryName" 
+                        placeholder="e.g., Academic, Facilities"
+                        class="input input-bordered w-full focus:input-primary" 
+                        required
+                    />
+                </div>
+                
+                <div class="form-control">
+                    <label class="label">
+                        <span class="label-text font-semibold">
+                            <i class="fas fa-align-left mr-2 text-primary"></i>Description
+                        </span>
+                    </label>
+                    <textarea 
+                        id="categoryDescription" 
+                        placeholder="Brief description of this category"
+                        class="textarea textarea-bordered w-full h-24 focus:textarea-primary"
+                        required
+                    ></textarea>
+                </div>
+                
+                <div class="flex gap-3 mt-6">
+                    <button type="submit" class="btn btn-primary flex-1">
+                        <i class="fas fa-save mr-2"></i>
+                        Save Category
+                    </button>
+                    <button type="button" onclick="closeCategoryModal()" class="btn btn-outline">
+                        Cancel
+                    </button>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    <!-- Edit User Modal -->
+    <div id="editUserModal" class="hidden fixed inset-0 bg-black/50 backdrop-blur-sm z-50 flex items-center justify-center p-4">
+        <div class="bg-white rounded-3xl shadow-2xl max-w-2xl w-full max-h-[90vh] overflow-y-auto">
+            <div class="sticky top-0 bg-gradient-to-r from-blue-600 to-indigo-600 text-white p-6 rounded-t-3xl z-10">
+                <div class="flex items-center justify-between">
+                    <h2 class="text-2xl font-bold">Edit User</h2>
+                    <button onclick="closeEditUserModal()" class="btn btn-sm btn-circle btn-ghost text-white hover:bg-white/20">
+                        <i class="fas fa-times text-xl"></i>
+                    </button>
+                </div>
+            </div>
+            
+            <form onsubmit="submitEditUser(event)" class="p-6 space-y-4">
+                <input type="hidden" id="editUserId" />
+                
+                <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+                    <div>
+                        <label class="label">
+                            <span class="label-text font-semibold">
+                                <i class="fas fa-user mr-2 text-blue-600"></i>
+                                First Name *
+                            </span>
+                        </label>
+                        <input 
+                            type="text" 
+                            id="editUserFirstName" 
+                            placeholder="First Name"
+                            class="input input-bordered w-full"
+                            required
+                        />
+                    </div>
+                    
+                    <div>
+                        <label class="label">
+                            <span class="label-text font-semibold">
+                                <i class="fas fa-user mr-2 text-blue-600"></i>
+                                Last Name *
+                            </span>
+                        </label>
+                        <input 
+                            type="text" 
+                            id="editUserLastName" 
+                            placeholder="Last Name"
+                            class="input input-bordered w-full"
+                            required
+                        />
+                    </div>
+                </div>
+                
+                <div>
+                    <label class="label">
+                        <span class="label-text font-semibold">
+                            <i class="fas fa-user mr-2 text-blue-600"></i>
+                            Middle Name
+                        </span>
+                    </label>
+                    <input 
+                        type="text" 
+                        id="editUserMiddleName" 
+                        placeholder="Middle Name (Optional)"
+                        class="input input-bordered w-full"
+                    />
+                </div>
+                
+                <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+                    <div>
+                        <label class="label">
+                            <span class="label-text font-semibold">
+                                <i class="fas fa-envelope mr-2 text-blue-600"></i>
+                                Email
+                            </span>
+                        </label>
+                        <input 
+                            type="email" 
+                            id="editUserEmail" 
+                            placeholder="Email"
+                            class="input input-bordered w-full bg-gray-100"
+                            readonly
+                        />
+                    </div>
+                    
+                    <div>
+                        <label class="label">
+                            <span class="label-text font-semibold">
+                                <i class="fas fa-id-card mr-2 text-blue-600"></i>
+                                SR Code
+                            </span>
+                        </label>
+                        <input 
+                            type="text" 
+                            id="editUserSRCode" 
+                            placeholder="SR Code"
+                            class="input input-bordered w-full bg-gray-100"
+                            readonly
+                        />
+                    </div>
+                </div>
+                
+                <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+                    <div>
+                        <label class="label">
+                            <span class="label-text font-semibold">
+                                <i class="fas fa-graduation-cap mr-2 text-blue-600"></i>
+                                Program
+                            </span>
+                        </label>
+                        <input 
+                            type="text" 
+                            id="editUserProgram" 
+                            placeholder="Program (e.g., BSCS)"
+                            class="input input-bordered w-full"
+                        />
+                    </div>
+                    
+                    <div>
+                        <label class="label">
+                            <span class="label-text font-semibold">
+                                <i class="fas fa-layer-group mr-2 text-blue-600"></i>
+                                Year Level
+                            </span>
+                        </label>
+                        <select id="editUserYearLevel" class="select select-bordered w-full">
+                            <option value="">Select Year</option>
+                            <option value="1">1st Year</option>
+                            <option value="2">2nd Year</option>
+                            <option value="3">3rd Year</option>
+                            <option value="4">4th Year</option>
+                        </select>
+                    </div>
+                </div>
+                
+                <div>
+                    <label class="label">
+                        <span class="label-text font-semibold">
+                            <i class="fas fa-user-shield mr-2 text-blue-600"></i>
+                            Role *
+                        </span>
+                    </label>
+                    <select id="editUserRole" class="select select-bordered w-full" required>
+                        <option value="student">Student</option>
+                        <option value="admin">Admin</option>
+                    </select>
+                </div>
+                
+                <div class="flex gap-3 mt-6">
+                    <button type="submit" class="btn btn-primary flex-1">
+                        <i class="fas fa-save mr-2"></i>
+                        Save Changes
+                    </button>
+                    <button type="button" onclick="closeEditUserModal()" class="btn btn-outline">
+                        Cancel
+                    </button>
+                </div>
+            </form>
+        </div>
+    </div>
+</body>
+</html>
+
+

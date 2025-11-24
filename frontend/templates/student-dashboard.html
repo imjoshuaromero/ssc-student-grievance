@@ -1,0 +1,1694 @@
+<!DOCTYPE html>
+<html lang="en" data-theme="light">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Student Dashboard - SSC Grievance System</title>
+    
+    <!-- Tailwind CSS -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    
+    <!-- DaisyUI -->
+    <link href="https://cdn.jsdelivr.net/npm/daisyui@4.4.19/dist/full.min.css" rel="stylesheet" type="text/css" />
+    
+    <!-- Font Awesome -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    
+    <!-- Custom CSS -->
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/styles.css') }}">
+    
+    <style>
+        .stat-card {
+            background: linear-gradient(135deg, rgba(255,255,255,0.95) 0%, rgba(255,255,255,0.85) 100%);
+            backdrop-filter: blur(20px);
+            border: 1px solid rgba(255,255,255,0.3);
+        }
+        
+        .concern-card {
+            background: rgba(255,255,255,0.95);
+            backdrop-filter: blur(20px);
+            border: 1px solid rgba(255,255,255,0.2);
+            transition: all 0.3s ease;
+        }
+        
+        .concern-card:hover {
+            transform: translateY(-4px);
+            box-shadow: 0 12px 24px rgba(0,0,0,0.1);
+        }
+        
+        .sidebar {
+            background: linear-gradient(180deg, rgba(15,23,41,0.98) 0%, rgba(26,36,68,0.98) 50%, rgba(45,58,122,0.98) 100%);
+            backdrop-filter: blur(20px);
+        }
+        
+        .nav-item {
+            transition: all 0.3s ease;
+        }
+        
+        .nav-item:hover {
+            background: rgba(255,255,255,0.1);
+            transform: translateX(8px);
+        }
+        
+        .nav-item.active {
+            background: rgba(255,255,255,0.15);
+            border-left: 4px solid #6366f1;
+        }
+        
+        .status-badge {
+            backdrop-filter: blur(10px);
+        }
+    </style>
+</head>
+<body class="gradient-bg min-h-screen overflow-x-hidden">
+    <!-- Main Container -->
+    <div class="flex min-h-screen">
+        <!-- Sidebar -->
+        <aside class="sidebar w-64 lg:w-72 min-h-screen fixed left-0 top-0 z-40 shadow-2xl">
+            <div class="p-6 flex flex-col h-full">
+                <!-- Logo & Branding -->
+                <div class="mb-8">
+                    <div class="flex items-center gap-3 mb-2">
+                        <img src="{{ url_for('static', filename='images/ssc_logo.png') }}" 
+                             alt="SSC Logo" 
+                             class="w-12 h-12 filter drop-shadow-lg"
+                             onerror="this.style.display='none'">
+                        <div>
+                            <h2 class="text-white font-bold text-lg leading-tight">MAY CONCERN<br>KA BA?</h2>
+                        </div>
+                    </div>
+                    <p class="text-white/70 text-xl text-center">Student Dashboard</p>
+                </div>
+                
+                <!-- User Profile -->
+                <div class="bg-white/10 backdrop-blur-sm rounded-2xl p-4 mb-6">
+                    <div class="flex items-center gap-3">
+                        <div class="avatar placeholder">
+                            <div class="bg-primary text-white rounded-full w-12 h-12">
+                                <span class="text-lg" id="userInitials">JD</span>
+                            </div>
+                        </div>
+                        <div class="flex-1 min-w-0">
+                            <h3 class="text-white font-semibold text-sm truncate" id="userName">Juan Dela Cruz</h3>
+                            <p class="text-white/70 text-xs truncate" id="userSRCode">24-12345</p>
+                        </div>
+                    </div>
+                </div>
+                
+                <!-- Navigation -->
+                <nav class="flex-1 space-y-2">
+                    <a href="#" data-section="dashboard" class="nav-item active flex items-center gap-3 px-4 py-3 rounded-xl text-white text-sm">
+                        <i class="fas fa-home text-lg w-5"></i>
+                        <span>Dashboard</span>
+                    </a>
+                    <a href="#" data-section="my-concerns" class="nav-item flex items-center gap-3 px-4 py-3 rounded-xl text-white text-sm">
+                        <i class="fas fa-list text-lg w-5"></i>
+                        <span>My Concerns</span>
+                    </a>
+                    <a href="#" data-section="new-concern" class="nav-item flex items-center gap-3 px-4 py-3 rounded-xl text-white text-sm">
+                        <i class="fas fa-plus-circle text-lg w-5"></i>
+                        <span>New Concern</span>
+                    </a>
+                    <a href="#" data-section="notifications" class="nav-item flex items-center gap-3 px-4 py-3 rounded-xl text-white text-sm">
+                        <i class="fas fa-bell text-lg w-5"></i>
+                        <span>Notifications</span>
+                        <span class="badge badge-error badge-sm ml-auto">3</span>
+                    </a>
+                    <a href="#" data-section="profile" class="nav-item flex items-center gap-3 px-4 py-3 rounded-xl text-white text-sm">
+                        <i class="fas fa-user text-lg w-5"></i>
+                        <span>Profile</span>
+                    </a>
+                </nav>
+                
+                <!-- Logout -->
+                <button id="logoutBtn" class="nav-item flex items-center gap-3 px-4 py-3 rounded-xl text-white text-sm mt-4 w-full hover:bg-red-500/20">
+                    <i class="fas fa-sign-out-alt text-lg w-5"></i>
+                    <span>Logout</span>
+                </button>
+            </div>
+        </aside>
+        
+        <!-- Main Content -->
+        <main class="flex-1 ml-64 lg:ml-72 p-6 lg:p-8">
+            <!-- Dashboard Section -->
+            <div id="dashboard-section" class="content-section">
+                <!-- Header -->
+                <header class="mb-8">
+                    <div class="flex flex-wrap items-center justify-between gap-4">
+                        <div>
+                            <h1 class="text-3xl lg:text-4xl font-bold text-white mb-2">Welcome Back! 👋</h1>
+                            <p class="text-white/80 text-sm lg:text-base">Track and manage your concerns</p>
+                        </div>
+                        <button id="submitNewConcernBtn" class="btn btn-primary rounded-2xl gap-2 shadow-lg hover:shadow-xl transition-all">
+                            <i class="fas fa-plus"></i>
+                            <span class="hidden sm:inline">Submit New Concern</span>
+                            <span class="sm:hidden">New</span>
+                        </button>
+                    </div>
+                </header>
+            
+            <!-- Stats Cards -->
+            <div class="grid grid-cols-2 lg:grid-cols-4 gap-4 lg:gap-6 mb-8">
+                <!-- Total Concerns -->
+                <div class="stat-card rounded-2xl p-4 lg:p-6 shadow-lg">
+                    <div class="flex items-center justify-between mb-3">
+                        <div class="bg-blue-100 p-3 rounded-xl">
+                            <i class="fas fa-list-alt text-blue-600 text-xl lg:text-2xl"></i>
+                        </div>
+                    </div>
+                    <h3 class="text-gray-600 text-xs lg:text-sm font-medium mb-1">Total Concerns</h3>
+                    <p id="totalConcerns" class="text-2xl lg:text-3xl font-bold text-gray-800">0</p>
+                </div>
+
+                <!-- Pending -->
+                <div class="stat-card rounded-2xl p-4 lg:p-6 shadow-lg">
+                    <div class="flex items-center justify-between mb-3">
+                        <div class="bg-yellow-100 p-3 rounded-xl">
+                            <i class="fas fa-clock text-yellow-600 text-xl lg:text-2xl"></i>
+                        </div>
+                    </div>
+                    <h3 class="text-gray-600 text-xs lg:text-sm font-medium mb-1">Pending</h3>
+                    <p id="pendingConcerns" class="text-2xl lg:text-3xl font-bold text-gray-800">0</p>
+                </div>
+
+                <!-- In Progress -->
+                <div class="stat-card rounded-2xl p-4 lg:p-6 shadow-lg">
+                    <div class="flex items-center justify-between mb-3">
+                        <div class="bg-purple-100 p-3 rounded-xl">
+                            <i class="fas fa-spinner text-purple-600 text-xl lg:text-2xl"></i>
+                        </div>
+                    </div>
+                    <h3 class="text-gray-600 text-xs lg:text-sm font-medium mb-1">In Progress</h3>
+                    <p id="inProgressConcerns" class="text-2xl lg:text-3xl font-bold text-gray-800">0</p>
+                </div>
+
+                <!-- Resolved -->
+                <div class="stat-card rounded-2xl p-4 lg:p-6 shadow-lg">
+                    <div class="flex items-center justify-between mb-3">
+                        <div class="bg-green-100 p-3 rounded-xl">
+                            <i class="fas fa-check-circle text-green-600 text-xl lg:text-2xl"></i>
+                        </div>
+                    </div>
+                    <h3 class="text-gray-600 text-xs lg:text-sm font-medium mb-1">Resolved</h3>
+                    <p id="resolvedConcerns" class="text-2xl lg:text-3xl font-bold text-gray-800">0</p>
+                </div>
+            </div>
+            
+            <!-- Recent Concerns -->
+            <section class="mb-8">
+                <div class="flex items-center justify-between mb-6">
+                    <h2 class="text-xl lg:text-2xl font-bold text-white">Recent Concerns</h2>
+                    <a href="#" data-section="my-concerns" class="text-white/80 hover:text-white text-sm transition-colors view-all-link">View All →</a>
+                </div>
+
+                <div id="recentConcernsList" class="space-y-4">
+                    <div class="text-center py-12">
+                        <div class="loading loading-spinner loading-lg text-white"></div>
+                        <p class="text-white mt-4">Loading concerns...</p>
+                    </div>
+                </div>
+            </section>
+
+            <!-- Quick Actions -->
+            <section>
+                <h2 class="text-xl lg:text-2xl font-bold text-white mb-6">Quick Actions</h2>
+                <div class="grid grid-cols-2 lg:grid-cols-3 gap-4">
+                    <button class="stat-card rounded-2xl p-5 lg:p-6 shadow-lg hover:shadow-xl transition-all text-left quick-action-btn" data-section="new-concern">
+                        <div class="bg-blue-100 p-3 rounded-xl w-fit mb-3">
+                            <i class="fas fa-plus text-blue-600 text-2xl"></i>
+                        </div>
+                        <h3 class="font-bold text-gray-800 text-sm lg:text-base mb-1">Submit Concern</h3>
+                        <p class="text-xs text-gray-600">Report a new issue</p>
+                    </button>
+                    
+                    <button class="stat-card rounded-2xl p-5 lg:p-6 shadow-lg hover:shadow-xl transition-all text-left quick-action-btn" data-section="my-concerns">
+                        <div class="bg-purple-100 p-3 rounded-xl w-fit mb-3">
+                            <i class="fas fa-history text-purple-600 text-2xl"></i>
+                        </div>
+                        <h3 class="font-bold text-gray-800 text-sm lg:text-base mb-1">View History</h3>
+                        <p class="text-xs text-gray-600">See all past concerns</p>
+                    </button>
+                    
+                    <button class="stat-card rounded-2xl p-5 lg:p-6 shadow-lg hover:shadow-xl transition-all text-left quick-action-btn" data-section="profile">
+                        <div class="bg-green-100 p-3 rounded-xl w-fit mb-3">
+                            <i class="fas fa-user-cog text-green-600 text-2xl"></i>
+                        </div>
+                        <h3 class="font-bold text-gray-800 text-sm lg:text-base mb-1">Edit Profile</h3>
+                        <p class="text-xs text-gray-600">Update your info</p>
+                    </button>
+                </div>
+            </section>
+            </div>
+            
+            <!-- My Concerns Section -->
+            <div id="my-concerns-section" class="content-section hidden">
+                <header class="mb-8">
+                    <div class="flex flex-wrap items-center justify-between gap-4">
+                        <div>
+                            <h1 class="text-3xl lg:text-4xl font-bold text-white mb-2">My Concerns</h1>
+                            <p class="text-white/80 text-sm lg:text-base">View and manage all your submitted concerns</p>
+                        </div>
+                        <button class="btn btn-primary rounded-2xl gap-2 shadow-lg" data-section="new-concern">
+                            <i class="fas fa-plus"></i>
+                            New Concern
+                        </button>
+                    </div>
+                </header>
+                
+                <!-- Filters -->
+                <div class="stat-card rounded-2xl p-4 mb-6 shadow-lg">
+                    <div class="flex flex-wrap gap-3 items-center">
+                        <div class="form-control">
+                            <select id="filterStatus" class="select select-sm select-bordered">
+                                <option value="">All Status</option>
+                                <option value="pending">Pending</option>
+                                <option value="in_progress">In Progress</option>
+                                <option value="resolved">Resolved</option>
+                                <option value="closed">Closed</option>
+                            </select>
+                        </div>
+                        <div class="form-control flex-1 min-w-[200px]">
+                            <input type="text" id="searchConcerns" placeholder="Search concerns..." class="input input-sm input-bordered w-full" />
+                        </div>
+                        <button id="applyFilters" class="btn btn-sm btn-primary">
+                            <i class="fas fa-filter mr-1"></i>Filter
+                        </button>
+                    </div>
+                </div>
+                
+                <!-- Concerns List -->
+                <div id="myConcernsContainer" class="space-y-4">
+                    <!-- Will be populated dynamically -->
+                    <div class="text-center py-12">
+                        <div class="loading loading-spinner loading-lg text-primary"></div>
+                        <p class="text-white mt-4">Loading your concerns...</p>
+                    </div>
+                </div>
+            </div>
+            
+            <!-- New Concern Section -->
+            <div id="new-concern-section" class="content-section hidden">
+                <header class="mb-8">
+                    <h1 class="text-3xl lg:text-4xl font-bold text-white mb-2">Submit New Concern</h1>
+                    <p class="text-white/80 text-sm lg:text-base">Report a new issue or concern</p>
+                </header>
+                
+                <div class="stat-card rounded-2xl p-6 lg:p-8 shadow-lg">
+                    <!-- Alert Container -->
+                    <div id="concernAlertContainer" class="mb-4"></div>
+                    
+                    <form id="newConcernForm" class="space-y-5">
+                        <!-- Title -->
+                        <div class="form-control">
+                            <label class="label">
+                                <span class="label-text font-semibold text-sm">
+                                    <i class="fas fa-heading mr-2 text-primary"></i>Concern Title
+                                </span>
+                            </label>
+                            <input 
+                                type="text" 
+                                id="concernTitle" 
+                                placeholder="Brief summary of your concern"
+                                class="input input-bordered w-full focus:input-primary" 
+                                required
+                            />
+                        </div>
+                        
+                        <!-- Category -->
+                        <div class="form-control">
+                            <label class="label">
+                                <span class="label-text font-semibold text-sm">
+                                    <i class="fas fa-tag mr-2 text-primary"></i>Category
+                                </span>
+                            </label>
+                            <select id="concernCategory" class="select select-bordered w-full focus:select-primary" required>
+                                <option value="">Select a category</option>
+                                <option value="1">Academic</option>
+                                <option value="2">Administrative Decisions</option>
+                                <option value="3">Services & Facilities</option>
+                                <option value="4">Harassment</option>
+                                <option value="5">Others</option>
+                            </select>
+                        </div>
+                        
+                        <!-- Office -->
+                        <div class="form-control">
+                            <label class="label">
+                                <span class="label-text font-semibold text-sm">
+                                    <i class="fas fa-building mr-2 text-primary"></i>Concerned Office
+                                </span>
+                            </label>
+                            <select id="concernOffice" class="select select-bordered w-full focus:select-primary" required>
+                                <option value="">Select an office</option>
+                                <option value="1">SSC</option>
+                                <option value="2">Registrar</option>
+                                <option value="3">OSAS</option>
+                                <option value="4">Facility Management</option>
+                                <option value="5">Academic Affairs</option>
+                            </select>
+                        </div>
+                        
+                        <!-- Description -->
+                        <div class="form-control">
+                            <label class="label">
+                                <span class="label-text font-semibold text-sm">
+                                    <i class="fas fa-align-left mr-2 text-primary"></i>Description
+                                </span>
+                            </label>
+                            <textarea 
+                                id="concernDescription" 
+                                placeholder="Provide detailed information about your concern..."
+                                class="textarea textarea-bordered w-full h-32 focus:textarea-primary" 
+                                required
+                            ></textarea>
+                            <label class="label">
+                                <span class="label-text-alt text-gray-500">Be as specific as possible</span>
+                            </label>
+                        </div>
+                        
+                        <!-- File Upload -->
+                        <div class="form-control">
+                            <label class="label">
+                                <span class="label-text font-semibold text-sm">
+                                    <i class="fas fa-paperclip mr-2 text-primary"></i>Attachments (Optional)
+                                </span>
+                            </label>
+                            <input 
+                                type="file" 
+                                id="concernAttachment" 
+                                class="file-input file-input-bordered w-full"
+                                accept="image/*,.pdf,.doc,.docx"
+                                multiple
+                            />
+                            <label class="label">
+                                <span class="label-text-alt text-gray-500">Max 5MB per file. Accepted: Images, PDF, Word</span>
+                            </label>
+                        </div>
+                        
+                        <!-- Anonymous Option -->
+                        <div class="form-control">
+                            <label class="cursor-pointer label justify-start gap-3">
+                                <input type="checkbox" id="isAnonymous" class="checkbox checkbox-primary" />
+                                <span class="label-text">
+                                    <i class="fas fa-user-secret mr-2"></i>Submit anonymously
+                                </span>
+                            </label>
+                        </div>
+                        
+                        <!-- Submit Button -->
+                        <div class="flex gap-3">
+                            <button type="submit" id="submitConcernBtn" class="btn btn-primary flex-1">
+                                <i class="fas fa-paper-plane mr-2"></i>
+                                Submit Concern
+                            </button>
+                            <button type="button" id="cancelConcernBtn" class="btn btn-outline" data-section="dashboard">
+                                Cancel
+                            </button>
+                        </div>
+                    </form>
+                </div>
+            </div>
+            
+            <!-- Notifications Section -->
+            <div id="notifications-section" class="content-section hidden">
+                <header class="mb-8">
+                    <div class="flex flex-wrap items-center justify-between gap-4">
+                        <div>
+                            <h1 class="text-3xl lg:text-4xl font-bold text-white mb-2">Notifications</h1>
+                            <p class="text-white/80 text-sm lg:text-base">Stay updated on your concerns</p>
+                        </div>
+                        <button onclick="markAllNotificationsRead()" class="btn btn-sm btn-outline text-white border-white hover:bg-white hover:text-gray-800 cursor-pointer z-10">
+                            <i class="fas fa-check-double mr-1"></i>
+                            Mark All Read
+                        </button>
+                    </div>
+                </header>
+                
+                <div id="notificationsList" class="space-y-3">
+                    <!-- Sample Notifications -->
+                    <div class="concern-card rounded-2xl p-5 shadow-lg">
+                        <div class="flex gap-4">
+                            <div class="flex-shrink-0">
+                                <div class="bg-blue-100 p-3 rounded-xl">
+                                    <i class="fas fa-comment text-blue-600 text-xl"></i>
+                                </div>
+                            </div>
+                            <div class="flex-1">
+                                <h3 class="font-bold text-gray-800 mb-1">New Comment on Your Concern</h3>
+                                <p class="text-sm text-gray-600 mb-2">Admin replied to "Broken Air Conditioning in Room 301"</p>
+                                <span class="text-xs text-gray-500"><i class="fas fa-clock mr-1"></i>2 hours ago</span>
+                            </div>
+                            <button class="btn btn-circle btn-ghost btn-sm">
+                                <i class="fas fa-times"></i>
+                            </button>
+                        </div>
+                    </div>
+                    
+                    <div class="concern-card rounded-2xl p-5 shadow-lg">
+                        <div class="flex gap-4">
+                            <div class="flex-shrink-0">
+                                <div class="bg-green-100 p-3 rounded-xl">
+                                    <i class="fas fa-check-circle text-green-600 text-xl"></i>
+                                </div>
+                            </div>
+                            <div class="flex-1">
+                                <h3 class="font-bold text-gray-800 mb-1">Concern Resolved</h3>
+                                <p class="text-sm text-gray-600 mb-2">"Wifi Connection Issues" has been marked as resolved</p>
+                                <span class="text-xs text-gray-500"><i class="fas fa-clock mr-1"></i>1 day ago</span>
+                            </div>
+                            <button class="btn btn-circle btn-ghost btn-sm">
+                                <i class="fas fa-times"></i>
+                            </button>
+                        </div>
+                    </div>
+                    
+                    <div class="concern-card rounded-2xl p-5 shadow-lg opacity-60">
+                        <div class="flex gap-4">
+                            <div class="flex-shrink-0">
+                                <div class="bg-yellow-100 p-3 rounded-xl">
+                                    <i class="fas fa-info-circle text-yellow-600 text-xl"></i>
+                                </div>
+                            </div>
+                            <div class="flex-1">
+                                <h3 class="font-bold text-gray-800 mb-1">Status Update</h3>
+                                <p class="text-sm text-gray-600 mb-2">"Library Book Shortage" status changed to In Progress</p>
+                                <span class="text-xs text-gray-500"><i class="fas fa-clock mr-1"></i>3 days ago</span>
+                            </div>
+                            <button class="btn btn-circle btn-ghost btn-sm">
+                                <i class="fas fa-times"></i>
+                            </button>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            
+            <!-- Profile Section -->
+            <div id="profile-section" class="content-section hidden">
+                <header class="mb-8">
+                    <h1 class="text-3xl lg:text-4xl font-bold text-white mb-2">Profile Settings</h1>
+                    <p class="text-white/80 text-sm lg:text-base">Manage your account information</p>
+                </header>
+                
+                <div class="grid lg:grid-cols-3 gap-6">
+                    <!-- Profile Card -->
+                    <div class="lg:col-span-1">
+                        <div class="stat-card rounded-2xl p-6 shadow-lg text-center">
+                            <div class="avatar placeholder mb-4">
+                                <div class="bg-primary text-white rounded-full w-24 h-24">
+                                    <span class="text-3xl" id="profileInitials">JD</span>
+                                </div>
+                            </div>
+                            <h3 class="font-bold text-gray-800 text-lg mb-1" id="profileName">Juan Dela Cruz</h3>
+                            <p class="text-gray-600 text-sm mb-4" id="profileEmail">juan.delacruz@g.batstate-u.edu.ph</p>
+                            <div class="badge badge-primary badge-outline">Student</div>
+                        </div>
+                    </div>
+                    
+                    <!-- Edit Form -->
+                    <div class="lg:col-span-2">
+                        <div class="stat-card rounded-2xl p-6 shadow-lg">
+                            <h3 class="font-bold text-gray-800 text-lg mb-4">Personal Information</h3>
+                            
+                            <form id="profileForm" class="space-y-4">
+                                <div class="grid md:grid-cols-2 gap-4">
+                                    <div class="form-control">
+                                        <label class="label">
+                                            <span class="label-text font-semibold text-sm">First Name</span>
+                                        </label>
+                                        <input type="text" id="profileFirstName" class="input input-bordered" value="Juan" />
+                                    </div>
+                                    <div class="form-control">
+                                        <label class="label">
+                                            <span class="label-text font-semibold text-sm">Last Name</span>
+                                        </label>
+                                        <input type="text" id="profileLastName" class="input input-bordered" value="Dela Cruz" />
+                                    </div>
+                                </div>
+                                
+                                <div class="form-control">
+                                    <label class="label">
+                                        <span class="label-text font-semibold text-sm">SR-Code</span>
+                                    </label>
+                                    <input type="text" id="profileSRCode" class="input input-bordered" value="24-12345" disabled />
+                                </div>
+                                
+                                <div class="form-control">
+                                    <label class="label">
+                                        <span class="label-text font-semibold text-sm">Email</span>
+                                    </label>
+                                    <input type="email" id="profileEmailField" class="input input-bordered" value="juan.delacruz@g.batstate-u.edu.ph" disabled />
+                                </div>
+                                
+                                <div class="divider">Change Password</div>
+                                
+                                <div class="form-control">
+                                    <label class="label">
+                                        <span class="label-text font-semibold text-sm">Current Password</span>
+                                    </label>
+                                    <input type="password" id="currentPassword" class="input input-bordered" placeholder="Enter current password" />
+                                </div>
+                                
+                                <div class="form-control">
+                                    <label class="label">
+                                        <span class="label-text font-semibold text-sm">New Password</span>
+                                    </label>
+                                    <input type="password" id="newPassword" class="input input-bordered" placeholder="Enter new password" />
+                                </div>
+                                
+                                <div class="form-control">
+                                    <label class="label">
+                                        <span class="label-text font-semibold text-sm">Confirm New Password</span>
+                                    </label>
+                                    <input type="password" id="confirmNewPassword" class="input input-bordered" placeholder="Confirm new password" />
+                                </div>
+                                
+                                <div class="flex gap-3 pt-4">
+                                    <button type="submit" class="btn btn-primary flex-1">
+                                        <i class="fas fa-save mr-2"></i>
+                                        Save Changes
+                                    </button>
+                                    <button type="button" class="btn btn-outline">
+                                        Cancel
+                                    </button>
+                                </div>
+                            </form>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </main>
+    </div>
+    
+    <!-- Auth JS -->
+    <script src="{{ url_for('static', filename='js/auth.js') }}"></script>
+    
+    <script>
+        // Prevent multiple executions
+        let isProcessing = false;
+        
+        // Check authentication on page load
+        document.addEventListener('DOMContentLoaded', async () => {
+            if (isProcessing) return;
+            isProcessing = true;
+            
+            // Handle Google OAuth callback FIRST
+            const urlParams = new URLSearchParams(window.location.search);
+            const googleLogin = urlParams.get('google_login');
+            const urlToken = urlParams.get('token');
+            
+            if (googleLogin === 'true' && urlToken) {
+                console.log('Processing Google login callback...');
+                localStorage.setItem('token', urlToken);
+                
+                // Fetch user data with the new token
+                try {
+                    const response = await fetch(`${API_BASE_URL}/users/profile`, {
+                        headers: {
+                            'Authorization': `Bearer ${urlToken}`
+                        }
+                    });
+                    
+                    if (response.ok) {
+                        const data = await response.json();
+                        const userData = data.user || data;
+                        localStorage.setItem('user', JSON.stringify(userData));
+                        console.log('Google login successful!', userData);
+                    } else {
+                        console.error('Failed to fetch user data');
+                        localStorage.clear();
+                        window.location.replace('/login');
+                        return;
+                    }
+                } catch (error) {
+                    console.error('Error fetching user data:', error);
+                    localStorage.clear();
+                    window.location.replace('/login');
+                    return;
+                }
+                
+                // Clean up URL and stop here
+                const cleanUrl = window.location.origin + window.location.pathname;
+                window.history.replaceState({}, document.title, cleanUrl);
+            }
+            
+            // Now check authentication
+            const token = localStorage.getItem('token');
+            const userStr = localStorage.getItem('user');
+            
+            if (!token || !userStr) {
+                console.log('No token or user data, redirecting to login');
+                window.location.replace('/login');
+                return;
+            }
+            
+            const user = JSON.parse(userStr);
+            
+            if (!user.user_id) {
+                console.log('Invalid user data, redirecting to login');
+                localStorage.clear();
+                window.location.replace('/login');
+                return;
+            }
+            
+            // Check if user is a student
+            if (user.role !== 'student') {
+                console.log('User is not a student, redirecting');
+                window.location.replace(user.role === 'admin' ? '/admin-dashboard' : '/login');
+                return;
+            }
+            
+            // Update user info in sidebar
+            if (user.first_name && user.last_name) {
+                document.getElementById('userName').textContent = `${user.first_name} ${user.last_name}`;
+                document.getElementById('userInitials').textContent = 
+                    `${user.first_name[0]}${user.last_name[0]}`.toUpperCase();
+            }
+            
+            if (user.sr_code) {
+                document.getElementById('userSRCode').textContent = user.sr_code;
+            }
+
+            // Load profile data
+            loadProfileData();
+            
+            // Load concerns data
+            await loadConcernsData();
+
+            // Load categories and offices for the form
+            await loadCategories();
+            await loadOffices();
+
+            // Load notifications initially
+            await loadNotifications();
+
+            // Mark All Read button - use event delegation since button might not be visible yet
+            document.addEventListener('click', (e) => {
+                const markAllBtn = e.target.closest('#markAllRead');
+                if (markAllBtn) {
+                    console.log('Mark All Read button clicked!');
+                    e.preventDefault();
+                    e.stopPropagation();
+                    markAllNotificationsRead();
+                }
+            });
+
+            // Logout functionality
+            const logoutBtn = document.getElementById('logoutBtn');
+            if (logoutBtn) {
+                logoutBtn.addEventListener('click', () => {
+                    logout();
+                });
+            }
+
+            // Navigation handling
+            document.querySelectorAll('.nav-item').forEach(item => {
+                item.addEventListener('click', function(e) {
+                    e.preventDefault();
+                    
+                    if (this.id !== 'logoutBtn') {
+                        const section = this.getAttribute('data-section');
+                        
+                        // Update active nav item
+                        document.querySelectorAll('.nav-item').forEach(nav => nav.classList.remove('active'));
+                        this.classList.add('active');
+                        
+                        // Show corresponding section
+                        showSection(section);
+                    }
+                });
+            });
+            
+            // Quick action buttons
+            document.querySelectorAll('.quick-action-btn').forEach(btn => {
+                btn.addEventListener('click', function() {
+                    const section = this.getAttribute('data-section');
+                    showSection(section);
+                    
+                    // Update nav active state
+                    document.querySelectorAll('.nav-item').forEach(nav => {
+                        nav.classList.remove('active');
+                        if (nav.getAttribute('data-section') === section) {
+                            nav.classList.add('active');
+                        }
+                    });
+                });
+            });
+            
+            // View All link
+            document.querySelectorAll('.view-all-link').forEach(link => {
+                link.addEventListener('click', function(e) {
+                    e.preventDefault();
+                    const section = this.getAttribute('data-section');
+                    showSection(section);
+                    
+                    // Update nav active state
+                    document.querySelectorAll('.nav-item').forEach(nav => {
+                        nav.classList.remove('active');
+                        if (nav.getAttribute('data-section') === section) {
+                            nav.classList.add('active');
+                        }
+                    });
+                });
+            });
+            
+            // Submit New Concern button in header
+            const submitNewConcernBtn = document.getElementById('submitNewConcernBtn');
+            if (submitNewConcernBtn) {
+                submitNewConcernBtn.addEventListener('click', () => {
+                    showSection('new-concern');
+                    
+                    // Update nav active state
+                    document.querySelectorAll('.nav-item').forEach(nav => {
+                        nav.classList.remove('active');
+                        if (nav.getAttribute('data-section') === 'new-concern') {
+                            nav.classList.add('active');
+                        }
+                    });
+                });
+            }
+            
+            // Handle cancel button in new concern form
+            const cancelConcernBtn = document.getElementById('cancelConcernBtn');
+            if (cancelConcernBtn) {
+                cancelConcernBtn.addEventListener('click', function() {
+                    showSection('dashboard');
+                    document.querySelectorAll('.nav-item').forEach(nav => {
+                        nav.classList.remove('active');
+                        if (nav.getAttribute('data-section') === 'dashboard') {
+                            nav.classList.add('active');
+                        }
+                    });
+                });
+            }
+
+            // Handle new concern form submission
+            const newConcernForm = document.getElementById('newConcernForm');
+            if (newConcernForm) {
+                newConcernForm.addEventListener('submit', async (e) => {
+                    e.preventDefault();
+                    await submitNewConcern(e);
+                });
+            }
+
+            // Apply filters button
+            const applyFiltersBtn = document.getElementById('applyFilters');
+            if (applyFiltersBtn) {
+                applyFiltersBtn.addEventListener('click', () => {
+                    filterConcerns();
+                });
+            }
+        });
+        
+        // Load concerns data
+        async function loadConcernsData() {
+            const token = localStorage.getItem('token');
+            
+            try {
+                console.log('Loading concerns data...');
+                const response = await fetch(`${API_BASE_URL}/concerns`, {
+                    headers: {
+                        'Authorization': `Bearer ${token}`
+                    }
+                });
+                
+                if (response.ok) {
+                    const concerns = await response.json();
+                    console.log('Concerns loaded:', concerns);
+                    
+                    // Update dashboard statistics
+                    updateDashboardStats(concerns);
+                    
+                    // Display recent concerns on dashboard
+                    displayRecentConcerns(concerns.slice(0, 5));
+                    
+                } else {
+                    console.error('Failed to load concerns - Status:', response.status);
+                }
+            } catch (error) {
+                console.error('Error loading concerns:', error);
+            }
+        }
+        
+        // Update dashboard statistics
+        function updateDashboardStats(concerns) {
+            const totalCount = concerns.length;
+            const pendingCount = concerns.filter(c => c.status === 'pending').length;
+            const inProgressCount = concerns.filter(c => c.status === 'in-progress' || c.status === 'in-review').length;
+            const resolvedCount = concerns.filter(c => c.status === 'resolved' || c.status === 'closed').length;
+            
+            // Update stat cards
+            const totalEl = document.getElementById('totalConcerns');
+            const pendingEl = document.getElementById('pendingConcerns');
+            const inProgressEl = document.getElementById('inProgressConcerns');
+            const resolvedEl = document.getElementById('resolvedConcerns');
+            
+            if (totalEl) totalEl.textContent = totalCount;
+            if (pendingEl) pendingEl.textContent = pendingCount;
+            if (inProgressEl) inProgressEl.textContent = inProgressCount;
+            if (resolvedEl) resolvedEl.textContent = resolvedCount;
+        }
+        
+        // Display recent concerns
+        function displayRecentConcerns(concerns) {
+            const container = document.getElementById('recentConcernsList');
+            if (!container) return;
+            
+            if (concerns.length === 0) {
+                container.innerHTML = `
+                    <div class="concern-card rounded-2xl p-8 shadow-lg text-center">
+                        <i class="fas fa-inbox text-4xl text-gray-300 mb-3"></i>
+                        <p class="text-gray-600 mb-4">No concerns yet</p>
+                        <button class="btn btn-primary" onclick="showSection('new-concern')">Submit Your First Concern</button>
+                    </div>
+                `;
+                return;
+            }
+            
+            container.innerHTML = concerns.map(concern => {
+                const statusColors = {
+                    'pending': 'badge-warning',
+                    'in-review': 'badge-info',
+                    'in-progress': 'badge-primary',
+                    'resolved': 'badge-success',
+                    'closed': 'badge-neutral'
+                };
+                
+                return `
+                    <div class="concern-card rounded-2xl p-5 lg:p-6 shadow-lg">
+                        <div class="flex items-start justify-between gap-4 mb-4">
+                            <div class="flex-1">
+                                <div class="flex items-center gap-2 mb-2">
+                                    <span class="badge ${statusColors[concern.status] || 'badge-neutral'} badge-sm">${concern.status.replace('-', ' ').toUpperCase()}</span>
+                                    <span class="text-xs text-gray-400">• ${new Date(concern.created_at).toLocaleDateString()}</span>
+                                </div>
+                                <h3 class="text-lg font-bold text-gray-800 mb-2">${concern.title}</h3>
+                                <p class="text-sm text-gray-600 line-clamp-2">${concern.description || 'No description'}</p>
+                            </div>
+                        </div>
+                        <div class="flex items-center justify-between">
+                            <div class="flex items-center gap-3 text-xs text-gray-500">
+                                <span><i class="fas fa-tag mr-1"></i>${concern.category_name || 'N/A'}</span>
+                                <span><i class="fas fa-ticket-alt mr-1"></i>${concern.ticket_number}</span>
+                            </div>
+                            <button class="btn btn-sm btn-ghost" onclick="viewConcernDetail(${concern.concern_id})">
+                                <i class="fas fa-eye"></i>
+                            </button>
+                        </div>
+                    </div>
+                `;
+            }).join('');
+        }
+        
+        // Load categories for the form
+        async function loadCategories() {
+            try {
+                const response = await fetch(`${API_BASE_URL}/concerns/categories`);
+                if (response.ok) {
+                    const data = await response.json();
+                    const select = document.getElementById('concernCategory');
+                    if (select && data.categories) {
+                        select.innerHTML = '<option value="">Select a category</option>';
+                        data.categories.forEach(cat => {
+                            select.innerHTML += `<option value="${cat.category_id}">${cat.category_name}</option>`;
+                        });
+                    }
+                }
+            } catch (error) {
+                console.error('Error loading categories:', error);
+            }
+        }
+        
+        // Load offices for the form
+        async function loadOffices() {
+            try {
+                const response = await fetch(`${API_BASE_URL}/concerns/offices`);
+                if (response.ok) {
+                    const data = await response.json();
+                    const select = document.getElementById('concernOffice');
+                    if (select && data.offices) {
+                        select.innerHTML = '<option value="">Select an office</option>';
+                        data.offices.forEach(office => {
+                            select.innerHTML += `<option value="${office.office_id}">${office.office_name}</option>`;
+                        });
+                    }
+                }
+            } catch (error) {
+                console.error('Error loading offices:', error);
+            }
+        }
+        
+        // Load my concerns
+        async function loadMyConcerns() {
+            const token = localStorage.getItem('token');
+            const container = document.getElementById('myConcernsContainer');
+            
+            if (!container) return;
+            
+            container.innerHTML = '<div class="text-center py-12"><div class="loading loading-spinner loading-lg text-primary"></div></div>';
+            
+            try {
+                const response = await fetch(`${API_BASE_URL}/concerns`, {
+                    headers: { 'Authorization': `Bearer ${token}` }
+                });
+                
+                if (response.ok) {
+                    const concerns = await response.json();
+                    displayMyConcerns(concerns);
+                }
+            } catch (error) {
+                console.error('Error loading concerns:', error);
+                container.innerHTML = '<div class="alert alert-error">Failed to load concerns</div>';
+            }
+        }
+        
+        // Display my concerns
+        function displayMyConcerns(concerns) {
+            const container = document.getElementById('myConcernsContainer');
+            if (!container) return;
+            
+            if (concerns.length === 0) {
+                container.innerHTML = `
+                    <div class="concern-card rounded-2xl p-12 shadow-lg text-center">
+                        <i class="fas fa-inbox text-6xl text-gray-300 mb-4"></i>
+                        <h3 class="text-xl font-bold text-gray-800 mb-2">No Concerns Yet</h3>
+                        <p class="text-gray-600 mb-6">You haven't submitted any concerns yet.</p>
+                        <button class="btn btn-primary" onclick="showSection('new-concern')">Submit Your First Concern</button>
+                    </div>
+                `;
+                return;
+            }
+            
+            container.innerHTML = concerns.map(concern => {
+                const statusColors = {
+                    'pending': 'badge-warning',
+                    'in-review': 'badge-info',
+                    'in-progress': 'badge-primary',
+                    'resolved': 'badge-success',
+                    'closed': 'badge-neutral'
+                };
+                
+                const priorityColors = {
+                    'low': 'text-gray-500',
+                    'normal': 'text-blue-500',
+                    'high': 'text-orange-500',
+                    'urgent': 'text-red-500'
+                };
+                
+                return `
+                    <div class="concern-card rounded-2xl p-6 shadow-lg">
+                        <div class="flex items-start justify-between gap-4 mb-4">
+                            <div class="flex-1">
+                                <div class="flex items-center gap-2 mb-2">
+                                    <span class="badge ${statusColors[concern.status] || 'badge-neutral'} badge-sm">${concern.status.replace('-', ' ').toUpperCase()}</span>
+                                    <span class="text-xs ${priorityColors[concern.priority]}">${concern.priority.toUpperCase()}</span>
+                                    <span class="text-xs text-gray-400">• ${new Date(concern.created_at).toLocaleDateString()}</span>
+                                </div>
+                                <h3 class="text-lg font-bold text-gray-800 mb-2">${concern.title}</h3>
+                                <p class="text-sm text-gray-600 mb-3">${concern.description ? (concern.description.length > 150 ? concern.description.substring(0, 150) + '...' : concern.description) : 'No description'}</p>
+                                <div class="flex flex-wrap gap-3 text-xs text-gray-500">
+                                    <span><i class="fas fa-tag mr-1"></i>${concern.category_name || 'N/A'}</span>
+                                    <span><i class="fas fa-ticket-alt mr-1"></i>${concern.ticket_number}</span>
+                                    ${concern.office_name ? `<span><i class="fas fa-building mr-1"></i>${concern.office_name}</span>` : ''}
+                                </div>
+                            </div>
+                        </div>
+                        <div class="flex gap-2">
+                            <button class="btn btn-sm btn-primary" onclick="viewConcernDetail(${concern.concern_id})">
+                                <i class="fas fa-eye mr-1"></i>View Details
+                            </button>
+                        </div>
+                    </div>
+                `;
+            }).join('');
+        }
+        
+        // View concern detail (for button clicks)
+        function viewConcernDetail(concernId) {
+            openConcernModal(concernId);
+        }
+        
+        // Function to show specific section
+        function showSection(sectionName) {
+            // Hide all sections
+            document.querySelectorAll('.content-section').forEach(section => {
+                section.classList.add('hidden');
+            });
+
+            // Show selected section
+            const targetSection = document.getElementById(`${sectionName}-section`);
+            if (targetSection) {
+                targetSection.classList.remove('hidden');
+
+                // Load data when showing specific sections
+                if (sectionName === 'my-concerns') {
+                    loadMyConcerns();
+                } else if (sectionName === 'profile') {
+                    loadProfileData();
+                } else if (sectionName === 'notifications') {
+                    loadNotifications();
+                }
+            }
+        }
+
+        // Load profile data from localStorage
+        function loadProfileData() {
+            const user = JSON.parse(localStorage.getItem('user'));
+            if (user) {
+                // Update profile card
+                const initials = `${user.first_name?.[0] || ''}${user.last_name?.[0] || ''}`.toUpperCase();
+                document.getElementById('profileInitials').textContent = initials;
+                document.getElementById('profileName').textContent = `${user.first_name || ''} ${user.last_name || ''}`;
+                document.getElementById('profileEmail').textContent = user.email || '';
+
+                // Update form fields
+                document.getElementById('profileFirstName').value = user.first_name || '';
+                document.getElementById('profileLastName').value = user.last_name || '';
+                document.getElementById('profileSRCode').value = user.sr_code || '';
+                document.getElementById('profileEmailField').value = user.email || '';
+            }
+        }
+
+        // Load notifications
+        async function loadNotifications() {
+            try {
+                const token = localStorage.getItem('token');
+                const response = await fetch(`${API_BASE_URL}/users/notifications`, {
+                    headers: {
+                        'Authorization': `Bearer ${token}`
+                    }
+                });
+
+                if (response.ok) {
+                    const data = await response.json();
+                    displayNotifications(data.notifications || []);
+                    updateNotificationBadge(data.notifications || []);
+                } else {
+                    console.error('Failed to load notifications');
+                    document.getElementById('notificationsList').innerHTML = `
+                        <div class="text-center py-8">
+                            <p class="text-gray-500">Failed to load notifications</p>
+                        </div>
+                    `;
+                }
+            } catch (error) {
+                console.error('Error loading notifications:', error);
+                document.getElementById('notificationsList').innerHTML = `
+                    <div class="text-center py-8">
+                        <p class="text-gray-500">Error loading notifications</p>
+                    </div>
+                `;
+            }
+        }
+
+        // Display notifications
+        function displayNotifications(notifications) {
+            const container = document.getElementById('notificationsList');
+            
+            if (!notifications || notifications.length === 0) {
+                container.innerHTML = `
+                    <div class="text-center py-12">
+                        <i class="fas fa-bell-slash text-gray-300 text-6xl mb-4"></i>
+                        <p class="text-gray-500 text-lg">No notifications yet</p>
+                        <p class="text-gray-400 text-sm mt-2">You'll see updates about your concerns here</p>
+                    </div>
+                `;
+                return;
+            }
+
+            container.innerHTML = notifications.map(notif => {
+                const iconMap = {
+                    'comment_added': { icon: 'fa-comment', color: 'blue' },
+                    'status_changed': { icon: 'fa-info-circle', color: 'yellow' },
+                    'concern_resolved': { icon: 'fa-check-circle', color: 'green' },
+                    'concern_assigned': { icon: 'fa-user-tag', color: 'purple' },
+                    'concern_created': { icon: 'fa-plus-circle', color: 'blue' }
+                };
+                
+                const icon = iconMap[notif.notification_type] || { icon: 'fa-bell', color: 'gray' };
+                const timeAgo = formatTimeAgo(notif.created_at);
+                const isRead = notif.is_read;
+                
+                return `
+                    <div class="concern-card rounded-2xl p-5 shadow-lg ${isRead ? 'opacity-60' : ''}">
+                        <div class="flex gap-4">
+                            <div class="flex-shrink-0">
+                                <div class="bg-${icon.color}-100 p-3 rounded-xl">
+                                    <i class="fas ${icon.icon} text-${icon.color}-600 text-xl"></i>
+                                </div>
+                            </div>
+                            <div class="flex-1">
+                                <h3 class="font-bold text-gray-800 mb-1">${notif.title}</h3>
+                                <p class="text-sm text-gray-600 mb-2">${notif.message}</p>
+                                <span class="text-xs text-gray-500"><i class="fas fa-clock mr-1"></i>${timeAgo}</span>
+                            </div>
+                            <button onclick="dismissNotification(${notif.notification_id})" class="btn btn-circle btn-ghost btn-sm">
+                                <i class="fas fa-times"></i>
+                            </button>
+                        </div>
+                    </div>
+                `;
+            }).join('');
+        }
+
+        // Update notification badge
+        function updateNotificationBadge(notifications) {
+            const unreadCount = notifications.filter(n => !n.is_read).length;
+            const badge = document.querySelector('[data-section="notifications"] .badge');
+            if (badge) {
+                if (unreadCount > 0) {
+                    badge.textContent = unreadCount;
+                    badge.classList.remove('hidden');
+                } else {
+                    badge.classList.add('hidden');
+                }
+            }
+        }
+
+        // Dismiss notification
+        async function dismissNotification(notificationId) {
+            try {
+                const token = localStorage.getItem('token');
+                const response = await fetch(`${API_BASE_URL}/users/notifications/${notificationId}/read`, {
+                    method: 'PATCH',
+                    headers: {
+                        'Authorization': `Bearer ${token}`
+                    }
+                });
+
+                if (response.ok) {
+                    loadNotifications(); // Reload to update display
+                }
+            } catch (error) {
+                console.error('Error dismissing notification:', error);
+            }
+        }
+
+        // Mark all notifications as read
+        async function markAllNotificationsRead() {
+            console.log('markAllNotificationsRead called');
+            try {
+                const token = localStorage.getItem('token');
+                console.log('Token:', token ? 'exists' : 'missing');
+                
+                const url = `${API_BASE_URL}/users/notifications/read-all`;
+                console.log('Calling:', url);
+                
+                const response = await fetch(url, {
+                    method: 'PATCH',
+                    headers: {
+                        'Authorization': `Bearer ${token}`
+                    }
+                });
+
+                console.log('Response status:', response.status);
+                
+                if (response.ok) {
+                    console.log('Successfully marked all as read');
+                    await loadNotifications(); // Reload to update display
+                } else {
+                    const error = await response.text();
+                    console.error('Failed to mark as read:', error);
+                    alert('Failed to mark notifications as read');
+                }
+            } catch (error) {
+                console.error('Error marking all as read:', error);
+                alert('Error: ' + error.message);
+            }
+        }
+
+        // Format time ago
+        function formatTimeAgo(timestamp) {
+            const now = new Date();
+            const past = new Date(timestamp);
+            const diffMs = now - past;
+            const diffMins = Math.floor(diffMs / 60000);
+            const diffHours = Math.floor(diffMs / 3600000);
+            const diffDays = Math.floor(diffMs / 86400000);
+
+            if (diffMins < 1) return 'Just now';
+            if (diffMins < 60) return `${diffMins} minute${diffMins > 1 ? 's' : ''} ago`;
+            if (diffHours < 24) return `${diffHours} hour${diffHours > 1 ? 's' : ''} ago`;
+            if (diffDays < 7) return `${diffDays} day${diffDays > 1 ? 's' : ''} ago`;
+            return past.toLocaleDateString();
+        }
+        
+        // Submit new concern form
+        async function submitNewConcern(e) {
+            const token = localStorage.getItem('token');
+            const submitBtn = document.getElementById('submitConcernBtn');
+            const alertContainer = document.getElementById('concernAlertContainer');
+            
+            // Disable button
+            submitBtn.disabled = true;
+            submitBtn.innerHTML = '<span class="loading loading-spinner"></span>Submitting...';
+            
+            try {
+                const formData = new FormData();
+                formData.append('title', document.getElementById('concernTitle').value);
+                formData.append('description', document.getElementById('concernDescription').value);
+                formData.append('category_id', document.getElementById('concernCategory').value);
+                formData.append('assigned_office_id', document.getElementById('concernOffice').value);
+                formData.append('is_anonymous', document.getElementById('isAnonymous').checked);
+                
+                // Add files if any
+                const files = document.getElementById('concernAttachment').files;
+                for (let i = 0; i < files.length; i++) {
+                    formData.append('attachments', files[i]);
+                }
+                
+                const response = await fetch(`${API_BASE_URL}/concerns`, {
+                    method: 'POST',
+                    headers: {
+                        'Authorization': `Bearer ${token}`
+                    },
+                    body: formData
+                });
+                
+                const data = await response.json();
+                
+                if (response.ok) {
+                    alertContainer.innerHTML = `
+                        <div class="alert alert-success">
+                            <i class="fas fa-check-circle"></i>
+                            <span>Concern submitted successfully!</span>
+                        </div>
+                    `;
+                    document.getElementById('newConcernForm').reset();
+                    
+                    // Redirect to my concerns after 2 seconds
+                    setTimeout(() => {
+                        showSection('my-concerns');
+                        document.querySelectorAll('.nav-item').forEach(nav => {
+                            nav.classList.remove('active');
+                            if (nav.getAttribute('data-section') === 'my-concerns') {
+                                nav.classList.add('active');
+                            }
+                        });
+                    }, 2000);
+                } else {
+                    alertContainer.innerHTML = `
+                        <div class="alert alert-error">
+                            <i class="fas fa-exclamation-circle"></i>
+                            <span>${data.message || 'Failed to submit concern'}</span>
+                        </div>
+                    `;
+                }
+            } catch (error) {
+                alertContainer.innerHTML = `
+                    <div class="alert alert-error">
+                        <i class="fas fa-exclamation-circle"></i>
+                        <span>Error submitting concern. Please try again.</span>
+                    </div>
+                `;
+            } finally {
+                submitBtn.disabled = false;
+                submitBtn.innerHTML = '<i class="fas fa-paper-plane mr-2"></i>Submit Concern';
+            }
+        }
+        
+        // Load all concerns with filters
+        async function loadAllConcerns() {
+            const token = localStorage.getItem('token');
+            const listContainer = document.getElementById('concernsList');
+            
+            listContainer.innerHTML = `
+                <div class="text-center py-12">
+                    <div class="loading loading-spinner loading-lg text-primary"></div>
+                    <p class="text-white mt-4">Loading your concerns...</p>
+                </div>
+            `;
+            
+            try {
+                const response = await fetch(`${API_BASE_URL}/concerns`, {
+                    headers: {
+                        'Authorization': `Bearer ${token}`
+                    }
+                });
+                
+                if (response.ok) {
+                    const concerns = await response.json();
+                    
+                    if (concerns.length === 0) {
+                        listContainer.innerHTML = `
+                            <div class="stat-card rounded-2xl p-12 shadow-lg text-center">
+                                <i class="fas fa-inbox text-6xl text-gray-300 mb-4"></i>
+                                <h3 class="text-xl font-bold text-gray-800 mb-2">No Concerns Yet</h3>
+                                <p class="text-gray-600 mb-4">You haven't submitted any concerns yet.</p>
+                                <button class="btn btn-primary" data-section="new-concern">
+                                    <i class="fas fa-plus mr-2"></i>Submit Your First Concern
+                                </button>
+                            </div>
+                        `;
+                    } else {
+                        renderConcerns(concerns);
+                    }
+                } else {
+                    listContainer.innerHTML = `
+                        <div class="alert alert-error">
+                            <i class="fas fa-exclamation-circle"></i>
+                            <span>Failed to load concerns</span>
+                        </div>
+                    `;
+                }
+            } catch (error) {
+                listContainer.innerHTML = `
+                    <div class="alert alert-error">
+                        <i class="fas fa-exclamation-circle"></i>
+                        <span>Error loading concerns</span>
+                    </div>
+                `;
+            }
+        }
+        
+        // Render concerns list
+        function renderConcerns(concerns) {
+            const listContainer = document.getElementById('concernsList');
+            
+            const html = concerns.map(concern => {
+                const statusColors = {
+                    'pending': 'badge-warning',
+                    'in_progress': 'badge-info',
+                    'resolved': 'badge-success',
+                    'closed': 'badge-neutral'
+                };
+                
+                const statusColor = statusColors[concern.status] || 'badge-neutral';
+                const timeAgo = formatTimeAgo(new Date(concern.created_at));
+                
+                return `
+                    <div class="concern-card rounded-2xl p-5 lg:p-6 shadow-lg">
+                        <div class="flex flex-wrap items-start justify-between gap-4 mb-4">
+                            <div class="flex-1 min-w-0">
+                                <div class="flex items-center gap-2 mb-2">
+                                    <span class="status-badge badge ${statusColor} badge-sm">${concern.status.replace('_', ' ')}</span>
+                                    <span class="text-xs text-gray-500">${timeAgo}</span>
+                                </div>
+                                <h3 class="text-base lg:text-lg font-bold text-gray-800 mb-2">${concern.title}</h3>
+                                <p class="text-sm text-gray-600 line-clamp-2">${concern.description}</p>
+                            </div>
+                            <button class="btn btn-ghost btn-sm rounded-xl" onclick="viewConcernDetails(${concern.concern_id})">
+                                <i class="fas fa-eye"></i>
+                            </button>
+                        </div>
+                        <div class="flex flex-wrap items-center gap-3 text-xs text-gray-500">
+                            <span class="flex items-center gap-1">
+                                <i class="fas fa-tag"></i>
+                                ${concern.category_name || 'Uncategorized'}
+                            </span>
+                            <span class="flex items-center gap-1">
+                                <i class="fas fa-building"></i>
+                                ${concern.office_name || 'Not Assigned'}
+                            </span>
+                        </div>
+                    </div>
+                `;
+            }).join('');
+            
+            listContainer.innerHTML = html;
+        }
+        
+        // Format time ago
+        function formatTimeAgo(date) {
+            const seconds = Math.floor((new Date() - date) / 1000);
+            const intervals = {
+                year: 31536000,
+                month: 2592000,
+                week: 604800,
+                day: 86400,
+                hour: 3600,
+                minute: 60
+            };
+            
+            for (const [unit, secondsInUnit] of Object.entries(intervals)) {
+                const interval = Math.floor(seconds / secondsInUnit);
+                if (interval >= 1) {
+                    return `${interval} ${unit}${interval !== 1 ? 's' : ''} ago`;
+                }
+            }
+            return 'Just now';
+        }
+        
+        // View concern details - opens modal
+        function viewConcernDetails(concernId) {
+            openConcernModal(concernId);
+        }
+
+        // View concern detail (for button clicks)
+        function viewConcernDetail(concernId) {
+            openConcernModal(concernId);
+        }
+
+        // Open concern detail modal
+        function openConcernModal(concernId) {
+            document.getElementById('concernModal').classList.remove('hidden');
+            loadConcernDetail(concernId);
+        }
+
+        // Close concern modal
+        function closeConcernModal() {
+            document.getElementById('concernModal').classList.add('hidden');
+        }
+
+        // Load concern details
+        async function loadConcernDetail(concernId) {
+            const token = localStorage.getItem('token');
+            
+            try {
+                const response = await fetch(`${API_BASE_URL}/concerns/${concernId}`, {
+                    headers: { 'Authorization': `Bearer ${token}` }
+                });
+
+                if (response.ok) {
+                    const concern = await response.json();
+                    displayConcernDetail(concern);
+                    await loadConcernComments(concernId);
+                    await loadConcernHistory(concernId);
+                } else {
+                    alert('Failed to load concern details');
+                    closeConcernModal();
+                }
+            } catch (error) {
+                console.error('Error loading concern:', error);
+                alert('Error loading concern details');
+                closeConcernModal();
+            }
+        }
+
+        // Display concern details in modal
+        function displayConcernDetail(concern) {
+            document.getElementById('modalTicketNumber').textContent = concern.ticket_number;
+            document.getElementById('modalTitle').textContent = concern.title;
+            document.getElementById('modalCategory').textContent = concern.category_name || 'N/A';
+            document.getElementById('modalOffice').textContent = concern.office_name || 'Not Assigned';
+            document.getElementById('modalDescription').textContent = concern.description || 'No description';
+            document.getElementById('modalCreatedAt').textContent = new Date(concern.created_at).toLocaleString();
+
+            // Update status badge
+            const statusBadge = document.getElementById('modalStatus');
+            statusBadge.className = 'badge badge-lg';
+            if (concern.status === 'pending') statusBadge.classList.add('badge-warning');
+            else if (concern.status === 'in-review') statusBadge.classList.add('badge-info');
+            else if (concern.status === 'in-progress') statusBadge.classList.add('badge-primary');
+            else if (concern.status === 'resolved') statusBadge.classList.add('badge-success');
+            statusBadge.textContent = concern.status.replace('-', ' ').toUpperCase();
+
+            // Update priority badge
+            const priorityBadge = document.getElementById('modalPriority');
+            priorityBadge.className = 'badge badge-lg';
+            if (concern.priority === 'urgent') priorityBadge.classList.add('badge-error');
+            else if (concern.priority === 'high') priorityBadge.classList.add('badge-warning');
+            else if (concern.priority === 'normal') priorityBadge.classList.add('badge-info');
+            priorityBadge.textContent = concern.priority.toUpperCase();
+        }
+
+        // Load comments
+        async function loadConcernComments(concernId) {
+            const token = localStorage.getItem('token');
+            
+            try {
+                const response = await fetch(`${API_BASE_URL}/concerns/${concernId}/comments`, {
+                    headers: { 'Authorization': `Bearer ${token}` }
+                });
+
+                if (response.ok) {
+                    const data = await response.json();
+                    displayComments(data.comments || []);
+                }
+            } catch (error) {
+                console.error('Error loading comments:', error);
+            }
+        }
+
+        // Display comments
+        function displayComments(comments) {
+            const container = document.getElementById('commentsContainer');
+            
+            if (comments.length === 0) {
+                container.innerHTML = '<p class="text-gray-500 text-center py-4">No comments yet</p>';
+                return;
+            }
+
+            container.innerHTML = comments.map(comment => `
+                <div class="bg-gray-50 rounded-lg p-4">
+                    <div class="flex items-start gap-3">
+                        <div class="bg-blue-100 rounded-full w-10 h-10 flex items-center justify-center flex-shrink-0">
+                            <i class="fas fa-user text-blue-600"></i>
+                        </div>
+                        <div class="flex-1">
+                            <div class="flex items-center gap-2 mb-1">
+                                <span class="font-semibold text-gray-800">${comment.admin_name || 'Admin'}</span>
+                                <span class="text-xs text-gray-500">${new Date(comment.created_at).toLocaleString()}</span>
+                            </div>
+                            <p class="text-gray-700">${comment.comment_text}</p>
+                        </div>
+                    </div>
+                </div>
+            `).join('');
+        }
+
+        // Load history
+        async function loadConcernHistory(concernId) {
+            const token = localStorage.getItem('token');
+            
+            try {
+                const response = await fetch(`${API_BASE_URL}/concerns/${concernId}/history`, {
+                    headers: { 'Authorization': `Bearer ${token}` }
+                });
+
+                if (response.ok) {
+                    const data = await response.json();
+                    displayHistory(data.history || []);
+                }
+            } catch (error) {
+                console.error('Error loading history:', error);
+            }
+        }
+
+        // Display history
+        function displayHistory(history) {
+            const container = document.getElementById('historyContainer');
+            
+            if (history.length === 0) {
+                container.innerHTML = '<p class="text-gray-500 text-center py-4">No history available</p>';
+                return;
+            }
+
+            container.innerHTML = history.map(item => `
+                <div class="flex gap-4">
+                    <div class="flex flex-col items-center">
+                        <div class="w-3 h-3 rounded-full bg-blue-500"></div>
+                        <div class="w-0.5 h-full bg-blue-200"></div>
+                    </div>
+                    <div class="pb-4">
+                        <p class="font-semibold text-gray-800">${item.action}</p>
+                        <p class="text-sm text-gray-600">${item.details || ''}</p>
+                        <p class="text-xs text-gray-500 mt-1">${new Date(item.created_at).toLocaleString()}</p>
+                    </div>
+                </div>
+            `).join('');
+        }
+
+        // Modal tab switching
+        function switchModalTab(tabName) {
+            // Update tab buttons
+            document.querySelectorAll('.modal-tab-btn').forEach(btn => {
+                btn.classList.remove('tab-active');
+            });
+            event.target.closest('.modal-tab-btn').classList.add('tab-active');
+
+            // Show/hide tab content
+            document.querySelectorAll('.modal-tab-content').forEach(content => {
+                content.classList.add('hidden');
+            });
+            document.getElementById(`${tabName}Tab`).classList.remove('hidden');
+        }
+
+        // Filter concerns
+        function filterConcerns() {
+            loadAllConcerns();
+        }
+    </script>
+
+    <!-- Concern Detail Modal -->
+    <div id="concernModal" class="hidden fixed inset-0 bg-black/50 backdrop-blur-sm z-50 flex items-center justify-center p-4">
+        <div class="bg-white rounded-2xl shadow-2xl max-w-3xl w-full max-h-[90vh] overflow-hidden">
+            <!-- Modal Header -->
+            <div class="bg-gradient-to-r from-blue-600 to-purple-600 p-6 text-white">
+                <div class="flex justify-between items-start mb-4">
+                    <div>
+                        <p class="text-sm opacity-90">Ticket #<span id="modalTicketNumber">000000</span></p>
+                        <h2 id="modalTitle" class="text-2xl font-bold mt-1">Concern Title</h2>
+                    </div>
+                    <button onclick="closeConcernModal()" class="btn btn-sm btn-circle btn-ghost text-white hover:bg-white/20">
+                        <i class="fas fa-times"></i>
+                    </button>
+                </div>
+                <div class="flex gap-3">
+                    <span id="modalStatus" class="badge badge-lg">PENDING</span>
+                    <span id="modalPriority" class="badge badge-lg">NORMAL</span>
+                </div>
+            </div>
+
+            <!-- Modal Tabs -->
+            <div class="border-b border-gray-200">
+                <div class="tabs tabs-boxed bg-transparent p-2">
+                    <button class="modal-tab-btn tab tab-active" onclick="switchModalTab('details')">
+                        <i class="fas fa-info-circle mr-2"></i>Details
+                    </button>
+                    <button class="modal-tab-btn tab" onclick="switchModalTab('comments')">
+                        <i class="fas fa-comments mr-2"></i>Comments
+                    </button>
+                    <button class="modal-tab-btn tab" onclick="switchModalTab('history')">
+                        <i class="fas fa-history mr-2"></i>History
+                    </button>
+                </div>
+            </div>
+
+            <!-- Modal Content -->
+            <div class="overflow-y-auto max-h-[calc(90vh-250px)]">
+                <!-- Details Tab -->
+                <div id="detailsTab" class="modal-tab-content p-6">
+                    <div class="space-y-4">
+                        <div>
+                            <label class="text-sm font-medium text-gray-600">Category</label>
+                            <p id="modalCategory" class="text-gray-800 font-semibold">-</p>
+                        </div>
+                        <div>
+                            <label class="text-sm font-medium text-gray-600">Assigned Office</label>
+                            <p id="modalOffice" class="text-gray-800 font-semibold">-</p>
+                        </div>
+                        <div>
+                            <label class="text-sm font-medium text-gray-600">Description</label>
+                            <p id="modalDescription" class="text-gray-700 whitespace-pre-wrap">-</p>
+                        </div>
+                        <div>
+                            <label class="text-sm font-medium text-gray-600">Submitted Date</label>
+                            <p id="modalCreatedAt" class="text-gray-800">-</p>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Comments Tab -->
+                <div id="commentsTab" class="modal-tab-content hidden p-6">
+                    <div id="commentsContainer" class="space-y-4">
+                        <p class="text-gray-500 text-center py-4">Loading comments...</p>
+                    </div>
+                </div>
+
+                <!-- History Tab -->
+                <div id="historyTab" class="modal-tab-content hidden p-6">
+                    <div id="historyContainer" class="space-y-2">
+                        <p class="text-gray-500 text-center py-4">Loading history...</p>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Modal Footer -->
+            <div class="border-t border-gray-200 p-4 bg-gray-50">
+                <button onclick="closeConcernModal()" class="btn btn-ghost w-full">Close</button>
+            </div>
+        </div>
+    </div>
+</body>
+</html>
+

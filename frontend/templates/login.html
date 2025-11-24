@@ -1,0 +1,183 @@
+<!DOCTYPE html>
+<html lang="en" data-theme="light">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Login - SSC Grievance System</title>
+    
+    <!-- Tailwind CSS -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    
+    <!-- DaisyUI -->
+    <link href="https://cdn.jsdelivr.net/npm/daisyui@4.4.19/dist/full.min.css" rel="stylesheet" type="text/css" />
+    
+    <!-- Font Awesome -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    
+    <!-- Custom CSS -->
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/styles.css') }}">
+</head>
+<body class="gradient-bg min-h-screen flex items-center justify-center p-4 overflow-hidden">
+    <div class="container max-w-7xl mx-auto relative z-10">
+        <div class="grid md:grid-cols-2 gap-8 items-center">
+            
+            <!-- Left Side - "MAY CONCERN KA BA?" Branding -->
+            <div class="text-white space-y-7">
+                <!-- Logo and Main Heading -->
+                <div class="flex items-center justify-center gap-6">
+                    <!-- SSC Logo -->
+                    <div class="ssc-logo-container flex-shrink-0">
+                        <img src="{{ url_for('static', filename='images/ssc_logo.png') }}" 
+                             alt="SSC Logo" 
+                             class="ssc-logo-large"
+                             onerror="this.style.display='none'">
+                    </div>
+                    
+                    <!-- Main Heading -->
+                    <div>
+                        <h1 class="concern-heading text-5xl md:text-6xl lg:text-7xl shine-text leading-tight">
+                            MAY<br>CONCERN<br>KA BA?
+                        </h1>
+                    </div>
+                </div>
+                
+                <!-- Subtitle -->
+                <div class="text-center space-y-2">
+                    <p class="text-lg md:text-xl font-bold tracking-wide">
+                        Your Voice Matters
+                    </p>
+                    <p class="text-xs md:text-sm opacity-90 max-w-md mx-auto leading-relaxed px-2 md:px-0">
+                        Submit and track your grievances securely online. 
+                        The Supreme Student Council is committed to listening and resolving your concerns.
+                    </p>
+                </div>
+                
+                <!-- Contact Icons -->
+                <div class="flex justify-center items-center gap-3">
+                    <a href="mailto:ssc.comsg-lipa@g.batstate-u.edu.ph" 
+                       class="btn btn-sm btn-circle btn-ghost hover:bg-white/20 text-white transition-all hover:scale-110"
+                       title="Email Us">
+                        <i class="fas fa-envelope text-lg"></i>
+                    </a>
+                    <a href="https://www.facebook.com/SSCBatStateUTheNEULipa" 
+                       target="_blank"
+                       class="btn btn-sm btn-circle btn-ghost hover:bg-white/20 text-white transition-all hover:scale-110"
+                       title="Facebook Page">
+                        <i class="fab fa-facebook text-lg"></i>
+                    </a>
+                </div>
+                
+                <!-- Features -->
+                <div class="grid grid-cols-2 gap-3 max-w-lg mx-auto">
+                    <div class="bg-white/5 backdrop-blur-sm rounded-xl p-3 border border-white/10 hover:bg-white/10 transition-all flex items-center justify-center gap-3">
+                        <i class="fas fa-shield-alt text-green-400 text-2xl flex-shrink-0"></i>
+                        <p class="text-xs font-semibold leading-tight">Secure & Confidential</p>
+                    </div>
+                    <div class="bg-white/5 backdrop-blur-sm rounded-xl p-3 border border-white/10 hover:bg-white/10 transition-all flex items-center justify-center gap-3">
+                        <i class="fas fa-bell text-yellow-400 text-2xl flex-shrink-0"></i>
+                        <p class="text-xs font-semibold leading-tight">Email Notifications</p>
+                    </div>
+                    <div class="bg-white/5 backdrop-blur-sm rounded-xl p-3 border border-white/10 hover:bg-white/10 transition-all flex items-center justify-center gap-3">
+                        <i class="fas fa-comments text-blue-400 text-2xl flex-shrink-0"></i>
+                        <p class="text-xs font-semibold leading-tight">Track Status</p>
+                    </div>
+                    <div class="bg-white/5 backdrop-blur-sm rounded-xl p-3 border border-white/10 hover:bg-white/10 transition-all flex items-center justify-center gap-3">
+                        <i class="fas fa-user-shield text-purple-400 text-2xl flex-shrink-0"></i>
+                        <p class="text-xs font-semibold leading-tight">Admin Support</p>
+                    </div>
+                </div>
+            </div>
+            
+            <!-- Right Side - Login Form -->
+            <div class="glass-effect rounded-3xl shadow-2xl p-6 md:p-10 max-w-md mx-auto w-full">
+                <h2 class="text-2xl md:text-3xl font-bold text-gray-800 mb-1 text-center">Welcome Back!</h2>
+                <p class="text-gray-600 mb-6 text-sm md:text-base text-center">Sign in to submit your concern</p>
+                
+                <!-- Alert Container -->
+                <div id="alertContainer" class="mb-4"></div>
+                
+                <!-- Google Sign In Button -->
+                <button id="googleSignInBtn" class="btn btn-outline btn-md md:btn-lg w-full mb-4 md:mb-6 hover:bg-white border-2 text-sm md:text-base">
+                    <svg class="w-5 h-5 md:w-6 md:h-6 mr-2" viewBox="0 0 24 24">
+                    <svg class="w-6 h-6 mr-2" viewBox="0 0 24 24">
+                        <path fill="#4285F4" d="M22.56 12.25c0-.78-.07-1.53-.2-2.25H12v4.26h5.92c-.26 1.37-1.04 2.53-2.21 3.31v2.77h3.57c2.08-1.92 3.28-4.74 3.28-8.09z"/>
+                        <path fill="#34A853" d="M12 23c2.97 0 5.46-.98 7.28-2.66l-3.57-2.77c-.98.66-2.23 1.06-3.71 1.06-2.86 0-5.29-1.93-6.16-4.53H2.18v2.84C3.99 20.53 7.7 23 12 23z"/>
+                        <path fill="#FBBC05" d="M5.84 14.09c-.22-.66-.35-1.36-.35-2.09s.13-1.43.35-2.09V7.07H2.18C1.43 8.55 1 10.22 1 12s.43 3.45 1.18 4.93l2.85-2.22.81-.62z"/>
+                        <path fill="#EA4335" d="M12 5.38c1.62 0 3.06.56 4.21 1.64l3.15-3.15C17.45 2.09 14.97 1 12 1 7.7 1 3.99 3.47 2.18 7.07l3.66 2.84c.87-2.6 3.3-4.53 6.16-4.53z"/>
+                    </svg>
+                    Sign in with Google
+                </button>
+                
+                <div class="divider">OR</div>
+                
+                <!-- Traditional Login Form -->
+                <form id="loginForm" class="space-y-4">
+                    <div class="form-control">
+                        <label class="label">
+                            <span class="label-text font-semibold text-sm">
+                                <i class="fas fa-envelope mr-2"></i>Email Address
+                            </span>
+                        </label>
+                        <input 
+                            type="email" 
+                            id="email" 
+                            placeholder="Enter your BatState-U email"
+                            class="input input-bordered w-full focus:input-primary text-sm md:text-base" 
+                            required
+                        />
+                    </div>
+                    
+                    <div class="form-control">
+                        <label class="label">
+                            <span class="label-text font-semibold text-sm">
+                                <i class="fas fa-lock mr-2"></i>Password
+                            </span>
+                        </label>
+                        <div class="relative">
+                            <input 
+                                type="password" 
+                                id="password" 
+                                placeholder="Enter your password"
+                                class="input input-bordered w-full focus:input-primary pr-12 text-sm md:text-base" 
+                                required
+                            />
+                            <button 
+                                type="button" 
+                                id="togglePassword"
+                                class="absolute right-4 top-1/2 transform -translate-y-1/2 text-gray-500 hover:text-gray-700"
+                            >
+                                <i class="fas fa-eye" id="eyeIcon"></i>
+                            </button>
+                        </div>
+                        <label class="label">
+                            <span class="label-text-alt text-blue-600 hover:underline cursor-pointer text-xs">
+                                Forgot password?
+                            </span>
+                        </label>
+                    </div>
+                    
+                    <button type="submit" id="loginBtn" class="btn btn-primary btn-md md:btn-lg w-full text-sm md:text-base">
+                        <i class="fas fa-sign-in-alt mr-2"></i>
+                        Sign In
+                    </button>
+                </form>
+                
+                <div class="text-center mt-4 md:mt-6">
+                    <p class="text-gray-600 text-sm">
+                        Don't have an account? 
+                        <a href="/register" class="text-primary font-semibold hover:underline">Register here</a>
+                    </p>
+                </div>
+                
+                <div class="text-center mt-6 md:mt-8 text-xs text-gray-500">
+                    <p>© 2025 BatState-U TNEU Lipa SSC</p>
+                    <p>All rights reserved</p>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- JavaScript -->
+    <script src="{{ url_for('static', filename='js/auth.js') }}"></script>
+</body>
+</html>

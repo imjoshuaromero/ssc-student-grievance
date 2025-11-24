@@ -1,0 +1,177 @@
+╔════════════════════════════════════════════════════════════════════════════╗
+║         STUDENT GRIEVANCE REPORTING SYSTEM - DATABASE DIAGRAM              ║
+║                    BatState-U TNEU Lipa - SSC Project                      ║
+╚════════════════════════════════════════════════════════════════════════════╝
+
+┌─────────────────────────┐
+│        USERS            │
+├─────────────────────────┤
+│ PK user_id              │
+│ UK sr_code              │
+│ UK email                │
+│    password_hash        │
+│    first_name           │
+│    last_name            │
+│    middle_name          │
+│    program              │
+│    year_level           │
+│    role (student/admin) │
+│    is_active            │
+│    created_at           │
+│    updated_at           │
+└─────────────────────────┘
+         │ 1
+         │
+         │ M
+         ▼
+┌─────────────────────────┐         ┌──────────────────────────┐
+│  CONCERN_CATEGORIES     │         │       OFFICES            │
+├─────────────────────────┤         ├──────────────────────────┤
+│ PK category_id          │         │ PK office_id             │
+│    category_name        │         │    office_name           │
+│    description          │         │    description           │
+│    is_active            │         │    contact_email         │
+│    created_at           │         │    contact_number        │
+└─────────────────────────┘         │    is_active             │
+         │ 1                        │    created_at            │
+         │                          └──────────────────────────┘
+         │ M                                │ 1
+         ▼                                  │
+┌──────────────────────────────────────────┐│ M
+│           CONCERNS                       ││
+├──────────────────────────────────────────┤▼
+│ PK concern_id                            │
+│ UK ticket_number (auto: GRV-2025-00001)  │
+│ FK student_id         ──────────┐        │
+│ FK category_id                  │        │
+│ FK assigned_office_id           │        │
+│ FK assigned_admin_id ───────────┼────┐   │
+│    title                        │    │   │
+│    description                  │    │   │
+│    location                     │    │   │
+│    incident_date                │    │   │
+│    status (pending/in-progress...) │  │  │
+│    priority (low/normal/high...)│   │   │
+│    is_anonymous                 │    │   │
+│    resolution_notes             │    │   │
+│    resolved_at                  │    │   │
+│ FK resolved_by ─────────────────┼────┼─┐ │
+│    created_at                   │    │ │ │
+│    updated_at                   │    │ │ │
+└──────────────────────────────────────────┘│ │
+         │ 1          │ 1         │ 1    │ │ │
+         │            │           └──────┘ │ │
+         ▼ M          ▼ M                  │ │
+┌──────────────────────────┐  ┌────────────┼─┼──────────┐
+│ CONCERN_STATUS_HISTORY   │  │  COMMENTS  │ │          │
+├──────────────────────────┤  ├────────────┼─┼──────────┤
+│ PK history_id            │  │ PK comment_│ │          │
+│ FK concern_id            │  │ FK concern_│ │          │
+│    old_status            │  │ FK user_id─┼─┘          │
+│    new_status            │  │    comment_text         │
+│ FK changed_by ───────────┼──┤    is_internal          │
+│    remarks               │  │    created_at           │
+│    created_at            │  │    updated_at           │
+└──────────────────────────┘  └─────────────────────────┘
+                                       │ M
+         │ 1                           │
+         │                             │
+         ▼ M                           │
+┌──────────────────────────┐           │
+│     NOTIFICATIONS        │           │
+├──────────────────────────┤           │
+│ PK notification_id       │           │
+│ FK user_id ──────────────┼───────────┘
+│ FK concern_id            │
+│    notification_type     │
+│    title                 │
+│    message               │
+│    is_read               │
+│    read_at               │
+│    created_at            │
+└──────────────────────────┘
+
+         │ 1
+         │
+         ▼ M
+┌──────────────────────────┐
+│      ATTACHMENTS         │
+├──────────────────────────┤
+│ PK attachment_id         │
+│ FK concern_id            │
+│ FK uploaded_by           │
+│    file_name             │
+│    file_path             │
+│    file_type             │
+│    file_size             │
+│    created_at            │
+└──────────────────────────┘
+
+
+═══════════════════════════════════════════════════════════════════════════
+
+RELATIONSHIPS LEGEND:
+═══════════════════════════════════════════════════════════════════════════
+
+1:M = One to Many relationship
+PK  = Primary Key
+FK  = Foreign Key
+UK  = Unique Key
+
+KEY RELATIONSHIPS:
+
+1. USERS (student) ──1:M──> CONCERNS
+   - A student can file multiple concerns
+   - Each concern is filed by one student
+
+2. USERS (admin) ──1:M──> CONCERNS (assigned_admin_id)
+   - An admin can be assigned to multiple concerns
+   - Each concern can be assigned to one admin
+
+3. CONCERN_CATEGORIES ──1:M──> CONCERNS
+   - A category can have multiple concerns
+   - Each concern belongs to one category
+
+4. OFFICES ──1:M──> CONCERNS
+   - An office can handle multiple concerns
+   - Each concern is assigned to one office
+
+5. CONCERNS ──1:M──> CONCERN_STATUS_HISTORY
+   - A concern has multiple status change logs
+   - Tracks complete audit trail
+
+6. CONCERNS ──1:M──> COMMENTS
+   - A concern can have multiple comments
+   - Communication between student and admin
+
+7. CONCERNS ──1:M──> NOTIFICATIONS
+   - A concern can trigger multiple notifications
+   - Updates sent to relevant users
+
+8. CONCERNS ──1:M──> ATTACHMENTS
+   - A concern can have multiple file attachments
+   - Support for evidence/documentation
+
+═══════════════════════════════════════════════════════════════════════════
+
+STATUS WORKFLOW:
+═══════════════════════════════════════════════════════════════════════════
+
+    PENDING ──> IN-REVIEW ──> IN-PROGRESS ──> RESOLVED ──> CLOSED
+                                    │
+                                    └──────> REJECTED
+
+═══════════════════════════════════════════════════════════════════════════
+
+DATA VALIDATION RULES:
+═══════════════════════════════════════════════════════════════════════════
+
+✓ SR-Code Format: YY-XXXXX (e.g., 21-12345)
+✓ Ticket Number: GRV-YYYY-XXXXX (auto-generated)
+✓ Email: Must be valid @batstate-u.edu.ph or @g.batstate-u.edu.ph
+✓ Role: Only 'student' or 'admin'
+✓ Status: Limited to defined values
+✓ Priority: low, normal, high, urgent
+✓ Year Level: 1-4 only
+
+═══════════════════════════════════════════════════════════════════════════
