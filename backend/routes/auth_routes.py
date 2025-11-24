@@ -11,8 +11,13 @@ from backend.utils.email_verification import (
 from backend.config.database import Database
 from datetime import datetime, timedelta
 import re
+import os
 
 auth_bp = Blueprint('auth', __name__)
+
+def get_base_url():
+    """Get base URL from environment or use default"""
+    return os.getenv('BASE_URL', 'http://localhost:5000')
 
 def validate_sr_code(sr_code):
     """Validate SR-Code format (YY-XXXXX)"""
@@ -79,20 +84,30 @@ def register():
         )
         
         if user:
-            # Generate token
-            token = generate_token(user['user_id'], user['role'])
+            # Generate and send verification code
+            code = generate_verification_code()
+            expires = datetime.now() + timedelta(minutes=15)
+            
+            # Store code in database
+            from backend.config.database import Database
+            Database.execute_query(
+                """UPDATE users 
+                   SET verification_code = %s, verification_code_expires = %s 
+                   WHERE user_id = %s""",
+                (code, expires, user['user_id'])
+            )
+            
+            # Send verification email
+            name = f"{user['first_name']} {user['last_name']}"
+            email_sent = send_verification_code_email(user['email'], name, code)
+            
+            if not email_sent:
+                print(f"Warning: Failed to send verification email to {user['email']}")
             
             return jsonify({
-                'message': 'Registration successful',
-                'user': {
-                    'user_id': user['user_id'],
-                    'sr_code': user['sr_code'],
-                    'email': user['email'],
-                    'first_name': user['first_name'],
-                    'last_name': user['last_name'],
-                    'role': user['role']
-                },
-                'token': token
+                'message': 'Registration successful! Please check your email for verification code.',
+                'email': user['email'],
+                'requires_verification': True
             }), 201
         
         return jsonify({'error': 'Registration failed'}), 500
@@ -120,6 +135,14 @@ def login():
         # Verify password
         if not verify_password(data['password'], user['password_hash']):
             return jsonify({'error': 'Invalid credentials'}), 401
+        
+        # Check if email is verified (skip for admin users)
+        if user['role'] != 'admin' and not user.get('email_verified', False):
+            return jsonify({
+                'error': 'Email not verified. Please verify your email first.',
+                'requires_verification': True,
+                'email': user['email']
+            }), 403
         
         # Generate token
         token = generate_token(user['user_id'], user['role'])
@@ -186,7 +209,7 @@ def google_callback():
         
         if not code:
             print("[ERROR] No authorization code provided")
-            return redirect('http://localhost:5000/login?error=no_code')
+            return redirect(f'{get_base_url()}/login?error=no_code')
         
         # Exchange code for token
         print("[DEBUG] Exchanging code for token...")
@@ -194,7 +217,7 @@ def google_callback():
         
         if not token_data:
             print("[ERROR] Failed to exchange code for token")
-            return redirect('http://localhost:5000/login?error=token_exchange_failed')
+            return redirect(f'{get_base_url()}/login?error=token_exchange_failed')
         
         print(f"[DEBUG] Token data received: {list(token_data.keys())}")
         
@@ -206,7 +229,7 @@ def google_callback():
         
         if not user_info:
             print("[ERROR] Failed to verify Google token")
-            return redirect('http://localhost:5000/login?error=token_verification_failed')
+            return redirect(f'{get_base_url()}/login?error=token_verification_failed')
         
         print(f"[DEBUG] User info: {user_info.get('email')}, Google ID: {user_info.get('google_id')}")
         
@@ -227,9 +250,9 @@ def google_callback():
             
             # Redirect to appropriate dashboard with token
             if user['role'] == 'admin':
-                return redirect(f'http://localhost:5000/admin-dashboard?token={token}&google_login=true')
+                return redirect(f'{get_base_url()}/admin-dashboard?token={token}&google_login=true')
             else:
-                return redirect(f'http://localhost:5000/student-dashboard?token={token}&google_login=true')
+                return redirect(f'{get_base_url()}/student-dashboard?token={token}&google_login=true')
         else:
             # New user - need additional info (SR code, program, year)
             print("[DEBUG] New user - requires registration")
@@ -252,13 +275,13 @@ def google_callback():
                 'google_id': google_data['google_id']
             })
             
-            return redirect(f'http://localhost:5000/register?{params}')
+            return redirect(f'{get_base_url()}/register?{params}')
             
     except Exception as e:
         import traceback
         print(f"[ERROR] Google callback error: {str(e)}")
         print(f"[ERROR] Traceback: {traceback.format_exc()}")
-        return redirect(f'http://localhost:5000/login?error=authentication_failed')
+        return redirect(f'{get_base_url()}/login?error=authentication_failed')
 
 @auth_bp.route('/google/register', methods=['POST'])
 def google_register():

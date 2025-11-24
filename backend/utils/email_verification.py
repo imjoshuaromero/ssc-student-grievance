@@ -2,6 +2,7 @@
 
 import random
 import string
+import os
 from datetime import datetime, timedelta
 from backend.utils.email_service import send_email
 
@@ -45,8 +46,9 @@ def send_verification_code_email(email, name, code):
 
 def send_verification_link_email(email, name, token):
     """Send verification link email"""
+    base_url = os.getenv('BASE_URL', 'http://localhost:5000')
     subject = "Email Verification - SSC Grievance System"
-    verification_link = f"http://localhost:5000/verify-email?token={token}"
+    verification_link = f"{base_url}/verify-email?token={token}"
     
     html_content = f"""
     <html>

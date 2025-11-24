@@ -435,19 +435,29 @@
                 const data = await response.json();
                 
                 if (response.ok) {
-                    // Save token and user data
-                    localStorage.setItem('token', data.token);
-                    localStorage.setItem('user', JSON.stringify(data.user));
-                    
-                    showAlert('Registration successful! Redirecting...', 'success');
-                    
-                    setTimeout(() => {
-                        if (data.user.role === 'admin') {
-                            window.location.href = '/admin-dashboard';
-                        } else {
-                            window.location.href = '/student-dashboard';
-                        }
-                    }, 1500);
+                    if (data.requires_verification) {
+                        // Store email for verification page
+                        localStorage.setItem('verification_email', data.email);
+                        showAlert('Registration successful! Please check your email for verification code.', 'success');
+                        
+                        setTimeout(() => {
+                            window.location.href = '/verify-email?email=' + encodeURIComponent(data.email);
+                        }, 2000);
+                    } else {
+                        // For Google registrations - save token and redirect to dashboard
+                        localStorage.setItem('token', data.token);
+                        localStorage.setItem('user', JSON.stringify(data.user));
+                        
+                        showAlert('Registration successful! Redirecting...', 'success');
+                        
+                        setTimeout(() => {
+                            if (data.user.role === 'admin') {
+                                window.location.href = '/admin-dashboard';
+                            } else {
+                                window.location.href = '/student-dashboard';
+                            }
+                        }, 1500);
+                    }
                 } else {
                     showAlert(data.error || 'Registration failed. Please try again.', 'error');
                     registerBtn.disabled = false;
