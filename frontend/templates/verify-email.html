@@ -20,77 +20,77 @@
     <!-- Custom CSS -->
     <link rel="stylesheet" href="{{ url_for('static', filename='css/styles.css') }}">
 </head>
-<body class="gradient-bg min-h-screen flex items-center justify-center p-4">
-    <div class="glass-effect rounded-3xl shadow-2xl p-8 w-full max-w-md">
-        <div class="text-center mb-6">
-            <div class="flex justify-center mb-4">
-                <div class="w-20 h-20 bg-blue-100 rounded-full flex items-center justify-center">
-                    <i class="fas fa-envelope-open-text text-4xl text-blue-600"></i>
+<body class="gradient-bg min-h-screen flex items-center justify-center p-2 sm:p-4 md:p-6">
+    <div class="glass-effect rounded-2xl sm:rounded-3xl shadow-2xl p-4 sm:p-6 md:p-8 w-full max-w-md">
+        <div class="text-center mb-4 sm:mb-6">
+            <div class="flex justify-center mb-3 sm:mb-4">
+                <div class="w-16 h-16 sm:w-20 sm:h-20 bg-blue-100 rounded-full flex items-center justify-center">
+                    <i class="fas fa-envelope-open-text text-3xl sm:text-4xl text-blue-600"></i>
                 </div>
             </div>
-            <h2 class="text-2xl font-bold text-gray-800">Verify Your Email</h2>
-            <p class="text-gray-600 text-sm mt-2">We've sent a verification code to your email address</p>
+            <h2 class="text-xl sm:text-2xl font-bold text-gray-800">Verify Your Email</h2>
+            <p class="text-gray-600 text-xs sm:text-sm mt-2">We've sent a verification code to your email address</p>
         </div>
         
         <!-- Alert Container -->
-        <div id="alertContainer" class="mb-4"></div>
+        <div id="alertContainer" class="mb-3 sm:mb-4"></div>
         
         <!-- Verification Form -->
-        <form id="verificationForm" class="space-y-4">
+        <form id="verificationForm" class="space-y-3 sm:space-y-4">
             <div class="form-control">
-                <label class="label">
-                    <span class="label-text font-semibold">
-                        <i class="fas fa-envelope mr-2"></i>Email Address
+                <label class="label py-0.5 sm:py-1">
+                    <span class="label-text font-semibold text-xs sm:text-sm">
+                        <i class="fas fa-envelope mr-1 sm:mr-2"></i>Email Address
                     </span>
                 </label>
                 <input 
                     type="email" 
                     id="email" 
                     placeholder="your.email@g.batstate-u.edu.ph"
-                    class="input input-bordered w-full" 
+                    class="input input-bordered input-sm sm:input-md w-full text-xs sm:text-sm" 
                     required
                     readonly
                 />
             </div>
             
             <div class="form-control">
-                <label class="label">
-                    <span class="label-text font-semibold">
-                        <i class="fas fa-key mr-2"></i>Verification Code
+                <label class="label py-0.5 sm:py-1">
+                    <span class="label-text font-semibold text-xs sm:text-sm">
+                        <i class="fas fa-key mr-1 sm:mr-2"></i>Verification Code
                     </span>
                 </label>
                 <input 
                     type="text" 
                     id="code" 
                     placeholder="Enter 6-digit code"
-                    class="input input-bordered w-full text-center text-2xl tracking-widest" 
+                    class="input input-bordered input-sm sm:input-md w-full text-center text-xl sm:text-2xl tracking-widest" 
                     maxlength="6"
                     pattern="[0-9]{6}"
                     required
                 />
-                <label class="label">
+                <label class="label py-0.5">
                     <span class="label-text-alt text-xs text-gray-500">Code expires in 15 minutes</span>
                 </label>
             </div>
             
-            <button type="submit" id="verifyBtn" class="btn btn-primary w-full">
-                <i class="fas fa-check-circle mr-2"></i>
+            <button type="submit" id="verifyBtn" class="btn btn-primary btn-sm sm:btn-md w-full text-xs sm:text-sm">
+                <i class="fas fa-check-circle mr-1 sm:mr-2"></i>
                 Verify Email
             </button>
         </form>
         
-        <div class="divider text-xs my-4">OR</div>
+        <div class="divider text-xs my-3 sm:my-4">OR</div>
         
         <div class="text-center space-y-2">
-            <p class="text-sm text-gray-600">Didn't receive the code?</p>
-            <button id="resendBtn" class="btn btn-ghost btn-sm">
-                <i class="fas fa-redo mr-2"></i>
+            <p class="text-xs sm:text-sm text-gray-600">Didn't receive the code?</p>
+            <button id="resendBtn" class="btn btn-ghost btn-xs sm:btn-sm">
+                <i class="fas fa-redo mr-1 sm:mr-2"></i>
                 Resend Code
             </button>
         </div>
         
-        <div class="text-center mt-6">
-            <a href="/login" class="text-primary text-sm hover:underline">
+        <div class="text-center mt-4 sm:mt-6">
+            <a href="/login" class="text-primary text-xs sm:text-sm hover:underline">
                 <i class="fas fa-arrow-left mr-1"></i>
                 Back to Login
             </a>

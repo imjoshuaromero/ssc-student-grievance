@@ -98,14 +98,25 @@ def create_concern():
             )
             
             # Send email notification
+            print(f"[DEBUG] Checking email conditions:")
+            print(f"  - Student found: {student is not None}")
+            print(f"  - Is anonymous: {is_anonymous}")
+            if student:
+                print(f"  - Student email: {student.get('email')}")
+                print(f"  - Student name: {student.get('first_name')} {student.get('last_name')}")
+            
             if student and not is_anonymous:
                 student_name = f"{student['first_name']} {student['last_name']}"
-                send_concern_created_email(
+                print(f"[DEBUG] Attempting to send email to {student['email']}")
+                email_sent = send_concern_created_email(
                     student['email'],
                     student_name,
                     concern['ticket_number'],
                     concern['title']
                 )
+                print(f"[DEBUG] Email send result: {email_sent}")
+            else:
+                print(f"[DEBUG] Email NOT sent - conditions not met")
             
             return jsonify({
                 'message': 'Concern created successfully',

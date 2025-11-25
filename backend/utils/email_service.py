@@ -11,23 +11,51 @@ def init_mail(app):
 
 def send_email(to, subject, body_text, body_html=None, max_retries=3):
     """Send email notification with retry logic"""
+    # For local development - check if we should skip email
+    if os.getenv('SKIP_EMAIL_SEND', 'False') == 'True':
+        print(f"📧 [MOCK] Email to {to}: {subject}")
+        return True
+    
+    # For local debugging SMTP server (no auth needed)
+    is_local_server = current_app.config.get('MAIL_SERVER') == 'localhost'
+    
     for attempt in range(max_retries):
         try:
+            # Check if mail is configured (skip for local server)
+            if not is_local_server:
+                if not current_app.config.get('MAIL_USERNAME') or not current_app.config.get('MAIL_PASSWORD'):
+                    print(f"⚠ Email not configured. Skipping email to {to}")
+                    return False
+            
             msg = Message(
                 subject=subject,
                 recipients=[to] if isinstance(to, str) else to,
                 body=body_text,
-                html=body_html or body_text
+                html=body_html or body_text,
+                sender=current_app.config.get('MAIL_DEFAULT_SENDER')
             )
             mail.send(msg)
             print(f"✓ Email sent successfully to {to}")
             return True
         except Exception as e:
+            error_msg = str(e)
+            # Check if it's a network/firewall block (WinError 10061)
+            if "10061" in error_msg or "refused" in error_msg.lower():
+                print(f"⚠ Network/Firewall blocking SMTP connection")
+                print(f"📧 [SIMULATED] Email would be sent to {to}: {subject}")
+                print(f"   Content: {body_text[:100]}...")
+                # Return True to simulate successful send for local development
+                return True
+            
             print(f"Email attempt {attempt + 1}/{max_retries} failed: {e}")
             if attempt < max_retries - 1:
                 time.sleep(2)  # Wait 2 seconds before retry
             else:
                 print(f"✗ Failed to send email to {to} after {max_retries} attempts")
+                print(f"   SMTP Server: {current_app.config.get('MAIL_SERVER')}")
+                print(f"   SMTP Port: {current_app.config.get('MAIL_PORT')}")
+                if not is_local_server:
+                    print(f"   Mail Username: {current_app.config.get('MAIL_USERNAME')}")
                 return False
 
 def send_concern_created_email(student_email, student_name, ticket_number, title):

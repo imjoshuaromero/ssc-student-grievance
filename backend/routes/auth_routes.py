@@ -79,20 +79,39 @@ def register():
         )
         
         if user:
-            # Generate token
+            # Generate and send verification code
+            code = generate_verification_code()
+            expires = datetime.now() + timedelta(minutes=15)
+            
+            # Store code in database
+            Database.execute_query(
+                """UPDATE users 
+                   SET verification_code = %s, verification_code_expires = %s 
+                   WHERE user_id = %s""",
+                (code, expires, user['user_id'])
+            )
+            
+            # Send verification email
+            name = f"{user['first_name']} {user['last_name']}"
+            email_sent = send_verification_code_email(user['email'], name, code)
+            
+            # Generate token (but user needs to verify email before full access)
             token = generate_token(user['user_id'], user['role'])
             
             return jsonify({
-                'message': 'Registration successful',
+                'message': 'Registration successful. Please check your email for verification code.',
                 'user': {
                     'user_id': user['user_id'],
                     'sr_code': user['sr_code'],
                     'email': user['email'],
                     'first_name': user['first_name'],
                     'last_name': user['last_name'],
-                    'role': user['role']
+                    'role': user['role'],
+                    'email_verified': False
                 },
-                'token': token
+                'token': token,
+                'requires_verification': True,
+                'verification_sent': email_sent
             }), 201
         
         return jsonify({'error': 'Registration failed'}), 500
@@ -121,6 +140,14 @@ def login():
         if not verify_password(data['password'], user['password_hash']):
             return jsonify({'error': 'Invalid credentials'}), 401
         
+        # Check email verification for students (admins bypass this)
+        if user['role'] == 'student' and not user.get('email_verified', False):
+            return jsonify({
+                'error': 'Email not verified',
+                'requires_verification': True,
+                'email': user['email']
+            }), 403
+        
         # Generate token
         token = generate_token(user['user_id'], user['role'])
         
@@ -134,7 +161,8 @@ def login():
                 'last_name': user['last_name'],
                 'role': user['role'],
                 'program': user.get('program'),
-                'year_level': user.get('year_level')
+                'year_level': user.get('year_level'),
+                'email_verified': user.get('email_verified', False)
             },
             'token': token
         }), 200

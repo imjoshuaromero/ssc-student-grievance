@@ -118,6 +118,14 @@ function initLoginForm() {
                             window.location.href = '/student-dashboard';
                         }
                     }, 1000);
+                } else if (response.status === 403 && data.requires_verification) {
+                    // Email not verified
+                    showAlert('Please verify your email address first', 'warning');
+                    localStorage.setItem('verification_email', data.email);
+                    
+                    setTimeout(() => {
+                        window.location.href = `/verify-email?email=${encodeURIComponent(data.email)}`;
+                    }, 2000);
                 } else {
                     showAlert(data.error || 'Invalid email or password', 'error');
                     loginBtn.disabled = false;
